@@ -385,11 +385,18 @@ class CyberdonosContentJSListener {
   // add button helper for insert tags
 
   insertAddButton(element, userId, whereToAppend, whereToGetName, options) {
-    element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
-      'beforeend',
-      `<img src="${browser.extension.getURL("assets/add.png")}" title="Добавить в базу" class="cyberdonos-tag add-to-cyberdonos cursor-pointer" id="${userId}" />`
-    )
-    element.querySelector(`img.add-to-cyberdonos`).addEventListener('click', () => {
+    if (this.TYPE === 'twitter') {
+      let twitMenu = element.querySelector('div.ProfileTweet-action div.dropdown-menu ul')
+      twitMenu.innerHTML += `<li class="dropdown-divider" role="presentation"></li>`
+      twitMenu.innerHTML += `<li role="presentation"><a href="#" class="add-to-cyberdonos">Настрочить донос</a></li>`
+    }
+    else {
+      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
+        'beforeend',
+        `<img src="${browser.extension.getURL("assets/add.png")}" title="Добавить в базу" class="cyberdonos-tag add-to-cyberdonos cursor-pointer" id="${userId}" />`
+      )
+    }
+    element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
       let nameWhenAdded
       if (options && options.userName) {
         nameWhenAdded = options.userName
