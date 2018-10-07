@@ -10,3 +10,4 @@ projectFilesBackup
 chrome-extension
 chrome-extension/*
 web-ext-artifacts
+tmp/*

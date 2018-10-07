@@ -14,5 +14,5 @@ cp browser-polyfill.js chrome-extension/js/
 sed -i 's#<!-- mozilla polyfill -->#<script type="application/javascript" src="js/browser-polyfill.js"></script>#g' chrome-extension/index.html
 sed -i 's#"js/dayjs.min.js"#"js/browser-polyfill.js", "js/dayjs.min.js"#g' chrome-extension/manifest.json
 sed -i 's#"js/choices.js"#"js/browser-polyfill.js", "js/choices.js"#g' chrome-extension/manifest.json
-zip tmp/cyberdonos-chrome.zip chrome-extension/*
+cd chrome-extension && zip -r ../tmp/cyberdonos-chrome.zip *
 rm -rf chrome-extension/*
