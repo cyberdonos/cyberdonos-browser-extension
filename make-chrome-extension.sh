@@ -15,4 +15,4 @@ sed -i 's#<!-- mozilla polyfill -->#<script type="application/javascript" src="j
 sed -i 's#"js/dayjs.min.js"#"js/browser-polyfill.js", "js/dayjs.min.js"#g' chrome-extension/manifest.json
 sed -i 's#"js/choices.js"#"js/browser-polyfill.js", "js/choices.js"#g' chrome-extension/manifest.json
 cd chrome-extension && zip -r ../tmp/cyberdonos-chrome.zip *
-rm -rf chrome-extension/*
+rm -rf *
