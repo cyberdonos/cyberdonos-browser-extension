@@ -1,0 +1,51 @@
+{
+  "name": "cyberdonos",
+  "version": "1.6.7",
+  "manifest_version": 2,
+  "description": "Кибердонос - идентификация кремлеботов, проплаченных троллей и прочих негодяев в социальных сетях",
+  "background": {
+    "scripts": ["js/dayjs.min.js", "js/background-new.js"]
+  },
+  "content_security_policy": "default-src 'self'; connect-src http://*.cyberdonos.xyz https://*.cyberdonos.xyz https://vk.com;",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.cyberdonos.xyz/*",
+        "https://vk.com/*",
+        "https://www.youtube.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": ["js/choices.js", "js/content.js"],
+      "css": ["css/choices.css", "css/popup.css", "css/abuse.css", "css/proof-popup.css", "css/add-person.popup.css", "css/extra.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    "assets/*.png"
+  ],
+  "icons": {
+  	"16": "icons/Icon16.png",
+  	"20": "icons/Icon20.png",
+  	"32": "icons/Icon32.png",
+  	"48": "icons/Icon48.png",
+  	"64": "icons/Icon64.png",
+  	"128": "icons/Icon128.png"
+  },
+  "browser_action": {
+  	"default_title": "Кибердонос",
+  	"default_icon": {
+  	  "20": "icons/Icon20.png",
+  	  "32": "icons/Icon32.png"
+  	},
+  	"default_popup": "index.html"
+  },
+  "permissions": [
+    "storage",
+    "notifications",
+    "*://*.cyberdonos.xyz/*",
+    "*://vk.com/*",
+    "https://www.youtube.com/*",
+    "https://twitter.com/*",
+    "https://www.facebook.com/*"
+  ]
+}

@@ -1,0 +1,27 @@
+div.cd-proof-popup {
+  z-index: 2021;
+  background-color: white;
+  position: fixed;
+  display: none;
+  width: 500px;
+  top: 0;
+  height: 200px;
+  border: 2px solid orange;
+}
+
+div.cd-close-proof {
+  float: right;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+div.cd-proof-wrapper {
+  padding: 10px;
+}
+
+p.cd-proof-text {
+  font-size: 16px;
+  text-align: left;
+}

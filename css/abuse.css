@@ -1,0 +1,41 @@
+div.cd-abuse-popup {
+  z-index: 2023;
+  background-color: white;
+  position: fixed;
+  display: none;
+  width: 500px;
+  top: 0;
+  height: 300px;
+  border: 2px solid orange;
+}
+
+div.cd-close-abuse {
+  float: right;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+button.cd-apply-abuse {
+  border: 1px solid black;
+}
+
+div.cd-abuse-wrapper {
+  padding: 10px;
+}
+
+textarea.cd-abuse-text {
+  width: 450px;
+  height: 100px;
+}
+
+p.cd-abuse-text {
+  font-size: 16px;
+  text-align: left;
+}
+
+p.cd-abuse-answer {
+  font-size: 16px;
+  text-align: left;
+}

@@ -1,0 +1,57 @@
+div.cd-add-person-popup {
+  z-index: 2147483647;
+  background-color: white;
+  position: fixed;
+  display: none;
+  width: 650px;
+  top: 0;
+  right: 0;
+  height: 580px;
+  border: 2px solid orange;
+}
+
+textarea.cd-add-person-proof {
+  min-width: 610px;
+}
+
+.disabled-input {
+  pointer-events:none;
+}
+
+.small-text {
+  font-size: 12px;
+}
+
+.cd-add-person-wrapper {
+  margin: 5px;
+}
+
+.cd-add-new-person-input-element {
+  padding: 10px;
+}
+
+.add-org-info {
+  display: none;
+}
+
+.float-right {
+  float: right;
+}
+
+.cd-add-person-textarea {
+    margin: 0;
+    padding: 0;
+    width: 600px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.sixhundredpxwidth {
+  width: 610px;
+}
+
+input.cd-add-org-short-name {
+  border: 1px solid black;
+}
