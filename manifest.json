@@ -2,7 +2,7 @@
   "name": "cyberdonos",
   "version": "1.6.7",
   "manifest_version": 2,
-  "description": "Кибердонос - идентификация кремлеботов, проплаченных троллей и прочих негодяев в социальных сетях",
+  "description": "Идентификация и добавление кремлеботов, проплаченных и других способствующих укреплению режима людей во вконтакте, twitter, youtube.",
   "background": {
     "scripts": ["js/dayjs.min.js", "js/background-new.js"]
   },
