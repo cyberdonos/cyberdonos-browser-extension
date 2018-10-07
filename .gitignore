@@ -7,4 +7,6 @@
 target/
 .idea
 projectFilesBackup
-
+chrome-extension
+chrome-extension/*
+web-ext-artifacts
