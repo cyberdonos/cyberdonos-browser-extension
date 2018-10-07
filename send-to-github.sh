@@ -3,7 +3,7 @@
 function commit {
   sudo -u cyberdonos git add .
   sudo -u cyberdonos git commit -m "$1"
-  git push origin master
+  sudo -u cyberdonos git push origin master
 }
 
 cd /opt/projects/cyberdonos-browser-extension
