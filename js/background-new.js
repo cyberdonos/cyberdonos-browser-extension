@@ -196,6 +196,7 @@ class CyberdonosBackgroundJS {
           return new Promise((resolve, reject) => {
             console.log(`Получен ответ о запросе токена: ${JSON.stringify(data)}`)
             if (data.role) {
+              this.HEADERS.headers.token = request.data
               localStorage.setItem("token", request.data)
               localStorage.setItem("role", data.role)
               resolve({ message: "Токен установлен! "})
