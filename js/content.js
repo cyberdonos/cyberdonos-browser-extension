@@ -42,7 +42,8 @@ class CyberdonosContentJSListener {
     const comments = document.querySelectorAll(`div.reply_wrap:not(.cyberdonos-processed)`)
     const fans = document.querySelectorAll(`div.fans_fan_row:not(.cyberdonos-processed)`)
     const profilePage = document.querySelectorAll("div.page_top:not(.cyberdonos-processed)")
-    Promise.all([this.findUsers(comments), this.findUsers(fans), this.findUsers(profilePage)]).then(() => {
+    const posts = document.querySelectorAll('._post:not(.cyberdonos-processed)')
+    Promise.all([this.findUsers(comments), this.findUsers(fans), this.findUsers(profilePage), this.findUsers(posts)]).then(() => {
       const fansContainers = document.querySelectorAll('div.fans_fan_row')
       if (fansContainers.length > 0) {
         fansContainers.forEach(e => {
@@ -50,26 +51,49 @@ class CyberdonosContentJSListener {
         })
       }
       Object.keys(this.PERSONS[this.TYPE]).forEach(userId => {
-        if (comments.length > 0) {
-          for (let i = 0; i < comments.length; i++) {
-            if (userId === comments[i].querySelector(`a.author`).getAttribute('data-from-id')) {
-              this.insertTags(comments[i], userId, 'div.reply_author', 'a.author')
+        try {
+          if (comments.length > 0) {
+            for (let i = 0; i < comments.length; i++) {
+              if (userId === comments[i].querySelector(`a.author`).getAttribute('data-from-id')) {
+                this.insertTags(comments[i], userId, 'div.reply_author', 'a.author')
+              }
             }
           }
+        } catch (e) {
+          console.error(`Ошибка при итерации комментариев ${e}`)
         }
-        if (fans.length > 0) {
-          for (let i = 0; i < fans.length; i++) {
-            if (userId === fans[i].getAttribute('data-id')) {
-              this.insertTags(fans[i], userId, 'div.fans_fan_name', 'a.fans_fan_lnk')
+        try {
+          if (fans.length > 0) {
+            for (let i = 0; i < fans.length; i++) {
+              if (userId === fans[i].getAttribute('data-id')) {
+                this.insertTags(fans[i], userId, 'div.fans_fan_name', 'a.fans_fan_lnk')
+              }
             }
           }
+        } catch (e) {
+          console.error(`Ошибка при итерации фанов ${e}`)
         }
-        if (profilePage.length > 0) {
-          for (let i = 0; i < profilePage.length; i++) {
-            if (profilePage[i] === document.querySelector('a#profile_photo_link').getAttribute('href').split("_")[0].split("/photo")[1]) {
-              this.insertTags(profilePage[i], userId, 'h2.page_name', 'h2.page_name')
+        try {
+          if (profilePage.length > 0) {
+            for (let i = 0; i < profilePage.length; i++) {
+              if (profilePage[i] === document.querySelector('a#profile_photo_link').getAttribute('href').split("_")[0].split("/photo")[1]) {
+                this.insertTags(profilePage[i], userId, 'h2.page_name', 'h2.page_name')
+              }
             }
           }
+        } catch (e) {
+          console.error(`Ошибка при итерации profile_page ${e}`)
+        }
+        try {
+          if (posts.length > 0) {
+            for (let i = 0; i < posts.length; i++) {
+              if (posts[i] && posts[i].querySelector('a.author').getAttribute('data-from-id') === userId) {
+                this.insertTags(posts[i], userId, 'div.like_cont', 'a.author')
+              }
+            }
+          }
+        } catch (e) {
+          console.error(`Ошибка при итерации ._posts ${e}`)
         }
       })
     })
@@ -320,7 +344,11 @@ class CyberdonosContentJSListener {
           for (let i = 0; i < selector.length; i++) {
             let userId = selector[i].querySelector(`a.author`) ? selector[i].querySelector(`a.author`).getAttribute('data-from-id') : null
             let userIdInLikes = selector[i].getAttribute('data-id')
-            let profileId = document.querySelector('a#profile_photo_link').getAttribute('href').split("_")[0].split("/photo")[1]
+            let profileId = null
+            let profile_photo_link = document.querySelector('a#profile_photo_link')
+            if (profile_photo_link) {
+              profileId = profile_photo_link.getAttribute('href').split("_")[0].split("/photo")[1]
+            }
             if (profileId && !profileId.startsWith("-") && userIds.indexOf(profileId) === -1 && this.PERSONS[this.TYPE][profileId] === undefined) {
               userIds.push(profileId)
             }
