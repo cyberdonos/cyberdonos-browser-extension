@@ -13,6 +13,7 @@ class CyberdonosContentJSListener {
     this.SERVER = null,
     this.SELECT_TAGS = null
     this.TYPE = null
+    this.top30url = `https://www.t30p.ru/search.aspx?`
   }
 
   findTwitterUsers() {
@@ -419,24 +420,48 @@ class CyberdonosContentJSListener {
       twitMenu.innerHTML += `<li role="presentation"><a href="#" class="add-to-cyberdonos">Настрочить кибердонос</a></li>`
     }
     else {
+      if (!element.querySelector(`div.cyberdonos-tags`).querySelector('.add-to-cyberdonos')) {
+        element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
+          'beforeend',
+          `<img src="${browser.extension.getURL("assets/add.png")}" title="Добавить в базу" class="cyberdonos-tag add-to-cyberdonos cursor-pointer" id="${userId}" />`
+        )
+      }
+    }
+    let nameWhenAdded
+    if (options && options.userName) {
+      nameWhenAdded = options.userName
+    }
+    else {
+      if (this.TYPE === 'youtube') {
+        nameWhenAdded = element.querySelector('a#author-text').textContent.trim()
+      }
+      else {
+        nameWhenAdded = element.querySelector(whereToGetName).textContent.trim()
+      }
+    }
+    // добавляем поиск по top30
+    if (this.TYPE === 'youtube') {
       element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
         'beforeend',
-        `<img src="${browser.extension.getURL("assets/add.png")}" title="Добавить в базу" class="cyberdonos-tag add-to-cyberdonos cursor-pointer" id="${userId}" />`
+        `<a href="${this.top30url}s=server:youtube.com ${encodeURIComponent(nameWhenAdded)}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти упоминания юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
+      )
+    }
+    if (this.TYPE === 'vk') {
+      if (!element.querySelector('a.cyberdonos-vk-mentions')) {
+        element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
+          'beforeend',
+          `<a href="https://vk.com/al_feed.php?obj=${userId}&q=&section=mentions"  target="_blank" class="cyberdonos-tag cyberdonos-vk-mentions">Найти упоминания</a>`
+        )
+      }
+    }
+    if (this.TYPE === 'twitter') {
+      let username = element.querySelector('span.username > b').textContent || null
+      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
+        'beforeend',
+        `<a href="${this.top30url}s=server:twitter.com ${username}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
       )
     }
     element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
-      let nameWhenAdded
-      if (options && options.userName) {
-        nameWhenAdded = options.userName
-      }
-      else {
-        if (this.TYPE === 'youtube') {
-          nameWhenAdded = element.querySelector('a#author-text').textContent.trim()
-        }
-        else {
-          nameWhenAdded = element.querySelector(whereToGetName).textContent.trim()
-        }
-      }
       document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
       this.SELECT_TAGS = new Choices(document.getElementsByClassName("cd-select-tags")[0], {
         removeItems: true,
@@ -514,11 +539,18 @@ class CyberdonosContentJSListener {
           // Конец Abuse
         }
         if (user.registerDate && user.lastLoggedIn) {
-          cyberdonosTags.insertAdjacentHTML(
-            'beforeend',
-            `<img src="${browser.extension.getURL("assets/register.png")}" title="Дата регистрации: ${user.registerDate}"/>
-             <img src="${browser.extension.getURL("assets/login.png")}" title="Дата последнего посещения: ${user.lastLoggedIn}"/>`
-          )
+          if (!cyberdonosTags.querySelector('.vk-registration-date')) {
+            cyberdonosTags.insertAdjacentHTML(
+              'beforeend',
+              `<img src="${browser.extension.getURL("assets/register.png")}" title="Дата регистрации: ${user.registerDate}" class="vk-registration-date"/>`
+            )
+          }
+          if (!cyberdonosTags.querySelector('.vk-last-login-date')) {
+            cyberdonosTags.insertAdjacentHTML(
+              'beforeend',
+              `<img src="${browser.extension.getURL("assets/login.png")}" title="Дата последнего посещения: ${user.lastLoggedIn}" class="vk-last-login-date"/>`
+            )
+          }
         }
         if (this.TYPE === 'vk' && !user.tags) {
           this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
