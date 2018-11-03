@@ -51,7 +51,11 @@ class CyberdonosContentJSListener {
           e.classList.add('vk-fans-enlarged')
         })
       }
-      Object.keys(this.PERSONS[this.TYPE]).forEach(userId => {
+
+      const userIds = Object.keys(this.PERSONS[this.TYPE])
+
+      for (let i = 0; i < userIds.length; i++) {
+        const userId = userIds[i]
         try {
           if (comments.length > 0) {
             for (let i = 0; i < comments.length; i++) {
@@ -96,7 +100,7 @@ class CyberdonosContentJSListener {
         } catch (e) {
           console.error(`Ошибка при итерации ._posts ${e}`)
         }
-      })
+      }
     })
     .catch(e => console.error(e))
   }
@@ -107,13 +111,22 @@ class CyberdonosContentJSListener {
     if (comments.length > 0) {
       Promise.all([this.findUsers(comments)])
       .then(() => {
-        Object.keys(this.PERSONS.youtube).forEach(userId => {
+        const userIds = Object.keys(this.PERSONS.youtube)
+        for (let i = 0; i < userIds.length; i++) {
+          const userId = userIds[i]
           for (let i = 0; i < comments.length; i++) {
             if (userId === comments[i].querySelector('a#author-text').getAttribute('href').split('/').pop()) {
               this.insertTags(comments[i], userId, 'div#toolbar', 'span.ytd-comment-renderer')
             }
           }
-        })
+        }
+        // Object.keys(this.PERSONS.youtube).forEach(userId => {
+        //   for (let i = 0; i < comments.length; i++) {
+        //     if (userId === comments[i].querySelector('a#author-text').getAttribute('href').split('/').pop()) {
+        //       this.insertTags(comments[i], userId, 'div#toolbar', 'span.ytd-comment-renderer')
+        //     }
+        //   }
+        // })
       })
       .catch(e => console.error(e))
     }
