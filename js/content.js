@@ -108,6 +108,7 @@ class CyberdonosContentJSListener {
   // youtube
   findYoutubeUsers(){
     const comments = document.querySelectorAll(`div#main:not(.cyberdonos-processed)`)
+
     if (comments.length > 0) {
       Promise.all([this.findUsers(comments)])
       .then(() => {
@@ -120,13 +121,6 @@ class CyberdonosContentJSListener {
             }
           }
         }
-        // Object.keys(this.PERSONS.youtube).forEach(userId => {
-        //   for (let i = 0; i < comments.length; i++) {
-        //     if (userId === comments[i].querySelector('a#author-text').getAttribute('href').split('/').pop()) {
-        //       this.insertTags(comments[i], userId, 'div#toolbar', 'span.ytd-comment-renderer')
-        //     }
-        //   }
-        // })
       })
       .catch(e => console.error(e))
     }
