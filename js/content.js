@@ -108,6 +108,25 @@ class CyberdonosContentJSListener {
   // youtube
   findYoutubeUsers(){
     const comments = document.querySelectorAll(`div#main:not(.cyberdonos-processed)`)
+    const commentsProcessed = document.querySelectorAll(`div#main.cyberdonos-processed`)
+    if (commentsProcessed.length > 0) {
+      //убрать зависшие теги
+      try {
+        for (let i = 0; i < commentsProcessed.length; i++) {
+          const cyberdonosTags = commentsProcessed[i].querySelector('div.cyberdonos-tags')
+          if (cyberdonosTags) {
+            const authorId = commentsProcessed[i].querySelector('a#author-text').getAttribute('href').split('/').pop()
+            const cyberdonosTagsUserId = cyberdonosTags.getAttribute('id')
+            if (authorId !== cyberdonosTagsUserId) {
+              cyberdonosTags.parentNode.removeChild(cyberdonosTags)
+              commentsProcessed[i].classList.remove('cyberdonos-processed')
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     if (comments.length > 0) {
       Promise.all([this.findUsers(comments)])
