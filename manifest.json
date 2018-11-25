@@ -5,7 +5,7 @@
   "homepage_url": "https://github.com/cyberdonos/cyberdonos-browser-extension",
   "description": "Идентификация и добавление кремлеботов, проплаченных и других способствующих укреплению режима людей во вконтакте, twitter, youtube.",
   "background": {
-    "scripts": ["js/dayjs.min.js", "js/background-new.js"]
+    "scripts": ["js/dayjs.js", "js/background-new.js"]
   },
   "content_security_policy": "default-src 'self'; connect-src http://*.cyberdonos.xyz https://*.cyberdonos.xyz https://vk.com;",
   "content_scripts": [
@@ -46,7 +46,6 @@
     "*://*.cyberdonos.xyz/*",
     "*://vk.com/*",
     "https://www.youtube.com/*",
-    "https://twitter.com/*",
-    "https://www.facebook.com/*"
+    "https://twitter.com/*"
   ]
 }
