@@ -230,8 +230,8 @@ class CyberdonosContentJSListener {
             <button class="add-new-person-submit float-right">Добавить</button>
           </div>
           <div class="cd-add-new-person-input-element sixhundredpxwidth">
-            <h3>Выберите теги (максимум 5)</h3>
-            <select name="cd-select-tags" class="cd-select-tags float-left small-text" multiple></select>
+            <h3>Выберите теги (максимум 5) CTRL + для выбора нескольких</h3>
+            <select name="cd-select-tags" class="cd-select-tags float-left small-text" id="cd-select-tags" multiple></select>
           </div>
           <div class="cd-add-new-person-input-element">
             <h3>Пруфы (максимум 767 символов)</h3>
@@ -280,7 +280,7 @@ class CyberdonosContentJSListener {
         document.querySelector(`select.cd-select-org-list`).value = null
         document.querySelector(`input.cd-search-org`).value = null
         document.querySelector(`textarea.cd-add-person-proof`).value = null
-        this.SELECT_TAGS.destroy()
+        //this.SELECT_TAGS.destroy()
         document.querySelector(`select.cd-select-tags`).value = null
         document.querySelector(`div.cd-add-person-popup`).style.display = 'none'
       }
@@ -293,11 +293,10 @@ class CyberdonosContentJSListener {
         //console.log($(`.cd-select-tags`).val());
         let isTagsOk = false
         let tags = []
-        if (document.querySelector(`.cd-select-tags`).options.length > 0) {
+        const selectedOptions = document.querySelectorAll(`.cd-select-tags option:checked`)
+        if (selectedOptions.length > 0) {
           isTagsOk = true
-          for (let i = 0; i < document.querySelector(`.cd-select-tags`).options.length; i++) {
-            tags.push(parseInt(document.querySelector(`.cd-select-tags`).options[i].value))
-          }
+          tags = Array.from(selectedOptions).map(el => parseInt(el.value))
         }
         document.querySelector(`.cd-select-tags`).options.length
          isTagsOk = document.querySelector(`.cd-select-tags`).value !== null && document.querySelector(`.cd-select-tags`).value.length > 0
@@ -488,12 +487,16 @@ class CyberdonosContentJSListener {
       )
     }
     element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
+      //document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
+      // this.SELECT_TAGS = new Choices(document.getElementsByClassName("cd-select-tags")[0], {
+      //   removeItems: true,
+      //   removeItemButton: true,
+      //   maxItemCount: 5
+      // })
+      // this.SELECT_TAGS = new Taggle('cd-select-tags', {
+      //   tags: this.TAGS.map(t => t.name)
+      // })
       document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
-      this.SELECT_TAGS = new Choices(document.getElementsByClassName("cd-select-tags")[0], {
-        removeItems: true,
-        removeItemButton: true,
-        maxItemCount: 5
-      })
       // запоняем скрытые поля
       document.querySelector(`input.cd-name_when_added`).value = nameWhenAdded
       document.querySelector(`span.cd-name_when_added`).textContent = nameWhenAdded
