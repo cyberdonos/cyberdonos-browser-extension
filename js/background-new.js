@@ -20,6 +20,7 @@ class CyberdonosBackgroundJS {
       "3": "Пользователь",
       "4": "reserved"
     }
+    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
   }
 
   getServer() {
@@ -88,8 +89,26 @@ class CyberdonosBackgroundJS {
   }
 
   getByTwitterId(userId) {
+    let result = { }
     return fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS)
-           .then((response) => response.json())
+          .then(response => response.json())
+          .then(_result => {
+            result = _result
+            return fetch(this.KARATEL_GET_BY_ID_URL + userId)
+          })
+          .then(_response => _response.text())
+          .then(__result => {
+            const lowerCasedResult = __result.toLowerCase()
+            const parsed = JSON.parse(lowerCasedResult)
+            if (parsed && parsed.banned && parsed.banned === true) {
+              if (!result.data) {
+                result.data = { }
+              }
+              result.data.IsInKaratelDb = true
+            }
+            return result
+          })
+          .catch(e => console.error(e))
   }
 
   start() {
@@ -221,7 +240,6 @@ class CyberdonosBackgroundJS {
         .catch(e => console.error(e))
       }
       else if (request.action === "getByTwitterId" && parseInt(request.id)) {
-        console.log('getByTwitterId')
         return this.getByTwitterId(request.id)
       }
       else if (request.action === "sendAbuse" && request.data) {

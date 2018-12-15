@@ -13,5 +13,6 @@ cp browser-polyfill.js chrome-extension/js/
 #wget -q https://raw.githubusercontent.com/mozilla/webextension-polyfill/master/src/browser-polyfill.js -O chrome-extension/js/browser-polyfill.js
 sed -i 's#<!-- mozilla polyfill -->#<script type="application/javascript" src="js/browser-polyfill.js"></script>#g' chrome-extension/index.html
 sed -i 's#"js/dayjs.js"#"js/browser-polyfill.js", "js/dayjs.js"#g' chrome-extension/manifest.json
+sed -i 's#"js/content.js"#"js/browser-polyfill.js", "js/content.js"#g' chrome-extension/manifest.json
 cd chrome-extension && zip -r ../tmp/cyberdonos-chrome.zip *
 rm -rf *

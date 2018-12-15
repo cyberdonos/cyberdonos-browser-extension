@@ -18,6 +18,12 @@ class CyberdonosContentJSListener {
 
   findTwitterUsers() {
     console.log(`start search twitter Users`)
+    const allProfileActions = document.querySelectorAll('.ProfileTweet-action')
+    if (allProfileActions.length > 0) {
+      for (let i = 0; i < allProfileActions.length; i++) {
+        allProfileActions[i].style.minWidth = '0px'
+      }
+    }
     const tweets = document.querySelectorAll(`.tweet:not(.cyberdonos-processed):not(.QuoteTweet-originalAuthor):not(.RetweetDialog-tweet)`)
     //console.log(tweets);
     this.findUsers(tweets)
@@ -546,6 +552,9 @@ class CyberdonosContentJSListener {
             document.querySelector(`p.cd-proof-text`).textContent = user.proof
             document.querySelector(`div.cd-proof-popup`).style.display = 'block'
           })
+        }
+        if (user.IsInKaratelDb) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/karatel.png")}" title="В базе карателя" class="cyberdonos-tag" />`)
         }
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
