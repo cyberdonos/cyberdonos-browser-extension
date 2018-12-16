@@ -20,6 +20,10 @@ class CyberdonosBackgroundJS {
       "3": "Пользователь",
       "4": "reserved"
     }
+    this.LISTS = {
+      L_BUTTERS_SCOTCH: [],
+      POROHOBOTY_PIDORY: []
+    }
     this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
   }
 
@@ -34,6 +38,18 @@ class CyberdonosBackgroundJS {
     return serverNames[Math.floor(Math.random() * (serverNames.length) - 0)]
   }
 
+  loadLists() {
+    return fetch(browser.extension.getURL("assets/L_Butters_Scotch_List.json"))
+           .then(LButtersScotchRaw => LButtersScotchRaw.json())
+           .then(LButtersScotchData =>  {
+             this.LISTS.L_BUTTERS_SCOTCH = LButtersScotchData
+             return fetch(browser.extension.getURL("assets/PorohoBoty_pidory_list.json"))
+           })
+           .then(PorohoBotyRaw => PorohoBotyRaw.json())
+           .then(PorohoBotyData => this.LISTS.POROHOBOTY_PIDORY = PorohoBotyData)
+           .catch(e => console.error(e))
+  }
+
   registerInsider() {
     return fetch(`${this.HOSTNAME}/api/v1/insiders/register`, { method: "POST" })
            .then((response) => response.json())
@@ -42,12 +58,18 @@ class CyberdonosBackgroundJS {
              if (result.data.token && result.data.role) {
                localStorage.setItem("token", result.data.token)
                localStorage.setItem("role", result.data.role)
-               localStorage.setItem("region", 77)
                this.HEADERS.headers.token = result.data
              }
              else {
                console.error(`Токен не получен`)
              }
+           })
+           .catch(e => {
+             browser.notifications.create("failed-to-start", {
+               "type": "basic",
+               "title": `Кибердонос: ${e.message} ошибка при старте.`,
+               "message": `${e}`
+             })
            })
   }
 
@@ -106,12 +128,25 @@ class CyberdonosBackgroundJS {
               }
               result.data.IsInKaratelDb = true
             }
+            if (this.LISTS.L_BUTTERS_SCOTCH.indexOf(userId) !== -1) {
+              if (!result.data) {
+                result.data = { }
+              }
+              result.data.IsInLButterScotchList = true
+            }
+            if (this.LISTS.POROHOBOTY_PIDORY.indexOf(userId) !== -1) {
+              if (!result.data) {
+                result.data = { }
+              }
+              result.data.IsInPorohoBotyPidoryList = true
+            }
             return result
           })
           .catch(e => console.error(e))
   }
 
   start() {
+    this.loadLists()
     fetch(`${this.HOSTNAME}/api/v1/status/get`)
     .then(() => {
       if (localStorage.getItem("token") && localStorage.getItem("role")) {

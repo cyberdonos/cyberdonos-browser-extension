@@ -421,6 +421,7 @@ class CyberdonosContentJSListener {
           const getTwitterUsersPromises = userIds.map(u => browser.runtime.sendMessage({action: "getByTwitterId", id: u}))
           Promise.all(getTwitterUsersPromises)
           .then((results) => {
+            //console.log(JSON.stringify(results))
             for (let i = 0; i < results.length; i++) {
               if (results[i].data) {
                 this.PERSONS[this.TYPE][userIds[i]] = results[i].data
@@ -556,6 +557,12 @@ class CyberdonosContentJSListener {
         if (user.IsInKaratelDb) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/karatel.png")}" title="В базе карателя" class="cyberdonos-tag" />`)
         }
+        if (user.IsInLButterScotchList) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/butters.png")}" title="Бот/Мракобес из списка Л. Баттерс Стотч" class="cyberdonos-tag" />`)
+        }
+        if (user.IsInPorohoBotyPidoryList) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ukrobot.png")}" title="Укробот/Порохобот из #ПОРОХОБОТЫПИДОРЫ" class="cyberdonos-tag" />`)
+        }
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
         }
@@ -624,7 +631,6 @@ class CyberdonosContentJSListener {
       if ([
         "www.youtube.com",
         "twitter.com",
-        "www.facebook.com",
         "vk.com"
       ].includes(locationHostname)) {
         try {
