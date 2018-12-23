@@ -557,11 +557,20 @@ class CyberdonosContentJSListener {
         if (user.IsInKaratelDb) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/karatel.png")}" title="В базе карателя" class="cyberdonos-tag" />`)
         }
-        if (user.IsInLButterScotchList) {
+        if (user.IsInLButterStotchList) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/butters.png")}" title="Бот/Мракобес из списка Л. Баттерс Стотч" class="cyberdonos-tag" />`)
         }
         if (user.IsInPorohoBotyPidoryList) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ukrobot.png")}" title="Укробот/Порохобот из #ПОРОХОБОТЫПИДОРЫ" class="cyberdonos-tag" />`)
+        }
+        if (user.IsInAntibot4navalnyList) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/antibot4navalny.png")}" title="Кремлебот из списка antibot4navalny" class="cyberdonos-tag" />`)
+        }
+        if (user.IsInYTOBSERVER_MANDBList) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytkremlebot.png")}" title="Кремлебот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
+        }
+        if (user.IsInYTOBSERVERSMMList) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytsmm.png")}" title="SMM-бот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
         }
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)

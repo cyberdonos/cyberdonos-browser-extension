@@ -21,10 +21,21 @@ class CyberdonosBackgroundJS {
       "4": "reserved"
     }
     this.LISTS = {
-      L_BUTTERS_SCOTCH: [],
-      POROHOBOTY_PIDORY: []
-    }
-    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+      twitter: {
+        L_BUTTERS_STOTCH: [],
+        POROHOBOTY_PIDORY: []
+      },
+      youtube: {},
+      vk: {}
+     }
+
+     this.ANTIBOT4NAVALNY_LIST_URL = `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`
+     this.ANTIBOT4NAVALNY_LIST_BACKUP_URL = browser.extension.getURL("assets/antibot4navalny.txt")
+     this.YTOBSERVER_MAINDB_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`
+     this.YTOBSERVER_MAINDB_BACKUP_URL = browser.extension.getURL("assets/YTObserver-mainDB.txt")
+     this.YTOBSERVER_SMM_ALL_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`
+     this.YTOBSERVER_SMM_ALL_BACKUP_URL = browser.extension.getURL("assets/YTObserver_smm_all.txt")
+     this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
   }
 
   getServer() {
@@ -38,15 +49,49 @@ class CyberdonosBackgroundJS {
     return serverNames[Math.floor(Math.random() * (serverNames.length) - 0)]
   }
 
-  loadLists() {
-    return fetch(browser.extension.getURL("assets/L_Butters_Scotch_List.json"))
-           .then(LButtersScotchRaw => LButtersScotchRaw.json())
-           .then(LButtersScotchData =>  {
-             this.LISTS.L_BUTTERS_SCOTCH = LButtersScotchData
+  loadTwitterLists() {
+    return fetch(browser.extension.getURL("assets/L_Butters_Stotch_List.json"))
+           .then(LButtersStotchRaw => LButtersStotchRaw.json())
+           .then(LButtersStotchData =>  {
+             this.LISTS.twitter.L_BUTTERS_STOTCH = LButtersStotchData
              return fetch(browser.extension.getURL("assets/PorohoBoty_pidory_list.json"))
            })
            .then(PorohoBotyRaw => PorohoBotyRaw.json())
-           .then(PorohoBotyData => this.LISTS.POROHOBOTY_PIDORY = PorohoBotyData)
+           .then(PorohoBotyData => {
+             this.LISTS.twitter.POROHOBOTY_PIDORY = PorohoBotyData
+             return Promise.all([
+               fetch(this.ANTIBOT4NAVALNY_LIST_URL),
+               fetch(this.ANTIBOT4NAVALNY_LIST_BACKUP_URL)
+             ])
+           })
+           .then(antibot4navalnyRawData => {
+             const rawDataAntibot4navalny = antibot4navalnyRawData[0].status === 200 ? antibot4navalnyRawData[0] : antibot4navalnyRawData[1]
+             return rawDataAntibot4navalny.text()
+           })
+           .then(antibot4navalny => this.LISTS.twitter.ANTIBOT4NAVALNY = antibot4navalny.split("\n"))
+           .catch(e => console.error(e))
+  }
+
+  loadYoutubeLists() {
+    return Promise.all([
+             fetch(this.YTOBSERVER_MAINDB_URL),
+             fetch(this.YTOBSERVER_MAINDB_BACKUP_URL),
+             fetch(this.YTOBSERVER_SMM_ALL_URL),
+             fetch(this.YTOBSERVER_SMM_ALL_BACKUP_URL)
+           ])
+           .then(ytresultsRaw => {
+             const mainDBRaw = ytresultsRaw[0].status === 200 ? ytresultsRaw[0] : ytresultsRaw[1]
+             const SMMALLRaw = ytresultsRaw[2].status === 200 ? ytresultsRaw[2] : ytresultsRaw[3]
+             return Promise.all([mainDBRaw.text(), SMMALLRaw.text()])
+           })
+           .then(ytObserverData => {
+             const _ytobserverArrayMain = ytObserverData[0].split("\r\n").map(e => e.split("="))
+             const _ytobserverArraySmm = ytObserverData[1].split("\r\n").map(e => e.split("="))
+             this.LISTS.youtube.YTOBSERVER_MAINDB = {}
+             this.LISTS.youtube.YTOBSERVER_SMM = {}
+             _ytobserverArrayMain.forEach(e => this.LISTS.youtube.YTOBSERVER_MAINDB[e[0]] = e[1])
+             _ytobserverArraySmm.forEach(e => this.LISTS.youtube.YTOBSERVER_SMM[e[0]] = e[1])
+           })
            .catch(e => console.error(e))
   }
 
@@ -128,25 +173,62 @@ class CyberdonosBackgroundJS {
               }
               result.data.IsInKaratelDb = true
             }
-            if (this.LISTS.L_BUTTERS_SCOTCH.indexOf(userId) !== -1) {
+            if (this.LISTS.twitter.L_BUTTERS_STOTCH.indexOf(userId) !== -1) {
               if (!result.data) {
                 result.data = { }
               }
-              result.data.IsInLButterScotchList = true
+              result.data.IsInLButterStotchList = true
             }
-            if (this.LISTS.POROHOBOTY_PIDORY.indexOf(userId) !== -1) {
+            if (this.LISTS.twitter.POROHOBOTY_PIDORY.indexOf(userId) !== -1) {
               if (!result.data) {
                 result.data = { }
               }
               result.data.IsInPorohoBotyPidoryList = true
+            }
+            if (this.LISTS.twitter.ANTIBOT4NAVALNY.indexOf(userId) !== -1) {
+              if (!result.data) {
+                result.data = { }
+              }
+              result.data.IsInAntibot4navalnyList = true
             }
             return result
           })
           .catch(e => console.error(e))
   }
 
+  getByYTUser(id) {
+    let result = { }
+    return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${id}`, this.HEADERS)
+           .then(response => response.json())
+           .then(_result => {
+             console.log(_result)
+             result = _result
+             if (this.LISTS.youtube.YTOBSERVER_MAINDB[id]) {
+               if (!result.data) {
+                 result.data = { }
+                 result.data.youtube_id = id
+               }
+               result.data.IsInYTOBSERVER_MANDBList = true
+               result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_MAINDB[id] : this.LISTS.youtube.YTOBSERVER_MAINDB[id]
+             }
+             if (this.LISTS.youtube.YTOBSERVER_SMM[id]) {
+               if (!result.data) {
+                 result.data = { }
+                 result.data.youtube_id = id
+               }
+               result.data.IsInYTOBSERVERSMMList = true
+               result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_SMM[id] : this.LISTS.youtube.YTOBSERVER_SMM[id]
+             }
+             console.log(result)
+             return result
+           })
+           .catch(e => console.error(e))
+  }
+
+
   start() {
-    this.loadLists()
+    this.loadTwitterLists()//.then(() => console.log(this.LISTS))
+    this.loadYoutubeLists().then(() => console.log(this.LISTS))
     fetch(`${this.HOSTNAME}/api/v1/status/get`)
     .then(() => {
       if (localStorage.getItem("token") && localStorage.getItem("role")) {
@@ -211,8 +293,11 @@ class CyberdonosBackgroundJS {
         .catch(e => console.error(e))
       }
       else if (request.action === 'getYoutubeUser' && request.id) {
-        return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${request.id}`, this.HEADERS)
-               .then((response) => response.json())
+        // return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${request.id}`, this.HEADERS)
+        //        .then((response) => response.json())
+        //        .catch(e => console.error(e))
+        console.log(1111111);
+        return this.getByYTUser(request.id)
                .catch(e => console.error(e))
       }
       else if (request.action === 'searchOrgs' && request.org) {
