@@ -14,6 +14,7 @@ class CyberdonosContentJSListener {
     this.SELECT_TAGS = null
     this.TYPE = null
     this.top30url = `https://www.t30p.ru/search.aspx?`
+    this.CONFIG = {}
   }
 
   findTwitterUsers() {
@@ -572,6 +573,12 @@ class CyberdonosContentJSListener {
         if (user.IsInYTOBSERVERSMMList) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytsmm.png")}" title="SMM-бот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
         }
+        if (user.inLists && user.inLists.length > 0) {
+          user.inLists.forEach(list => {
+            const meta = this.CONFIG.lists.lists[this.TYPE][list]
+            cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${meta.icon_url}" title="${meta.text}" class="cyberdonos-tag" />`)
+          })
+        }
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
         }
@@ -636,6 +643,7 @@ class CyberdonosContentJSListener {
       this.TAGS = systemDataResults.tags
       this.SERVER = systemDataResults.server
       this.STATUSES = systemDataResults.statuses
+      this.CONFIG = systemDataResults.config
       const locationHostname = window.location.hostname
       if ([
         "www.youtube.com",
@@ -650,17 +658,14 @@ class CyberdonosContentJSListener {
         if (locationHostname === "www.youtube.com") {
           this.TYPE = 'youtube'
           window.onload = () => {
-            setInterval(() => this.findYoutubeUsers(), 5000)
+            setInterval(() => this.findYoutubeUsers(), this.CONFIG.updateInterval || 5000)
           }
         }
         else if (locationHostname === "twitter.com") {
           this.TYPE = 'twitter'
           window.onload = () => {
-            setInterval(() => this.findTwitterUsers(), 5000)
+            setInterval(() => this.findTwitterUsers(), this.CONFIG.updateInterval || 5000)
           }
-        }
-        else if (locationHostname === "www.facebook.com") {
-          this.TYPE = 'facebook'
         }
         else if (locationHostname === "vk.com") {
           this.TYPE = 'vk'
@@ -668,7 +673,7 @@ class CyberdonosContentJSListener {
             setInterval(() =>{
               console.log('Start cyberdonos search cycle')
               this.findVKUsers()
-            }, 6000)
+            }, this.CONFIG.updateInterval || 6000)
           }
         }
         else {

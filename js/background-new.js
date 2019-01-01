@@ -29,13 +29,96 @@ class CyberdonosBackgroundJS {
       vk: {}
      }
 
-     this.ANTIBOT4NAVALNY_LIST_URL = `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`
-     this.ANTIBOT4NAVALNY_LIST_BACKUP_URL = browser.extension.getURL("assets/antibot4navalny.txt")
-     this.YTOBSERVER_MAINDB_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`
-     this.YTOBSERVER_MAINDB_BACKUP_URL = browser.extension.getURL("assets/YTObserver-mainDB.txt")
-     this.YTOBSERVER_SMM_ALL_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`
-     this.YTOBSERVER_SMM_ALL_BACKUP_URL = browser.extension.getURL("assets/YTObserver_smm_all.txt")
-     this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+   this.ANTIBOT4NAVALNY_LIST_URL = `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`
+   this.ANTIBOT4NAVALNY_LIST_BACKUP_URL = browser.extension.getURL("assets/antibot4navalny.txt")
+   this.YTOBSERVER_MAINDB_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`
+   this.YTOBSERVER_MAINDB_BACKUP_URL = browser.extension.getURL("assets/YTObserver-mainDB.txt")
+   this.YTOBSERVER_SMM_ALL_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`
+   this.YTOBSERVER_SMM_ALL_BACKUP_URL = browser.extension.getURL("assets/YTObserver_smm_all.txt")
+   this.NASHACANADA_LIST_URL = browser.extension.getURL("assets/nasha_canada_bots.json")
+   this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+   this.CONFIG = {
+     updateInterval: 5000,
+     lists: {
+       lists: {
+         youtube: {
+           YTOBSERVER_MAINDB: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/ytkremlebot.png"),
+             text: "В списках Кремлеботов YTObserver/Metabot for youtube",
+             type: "text",
+             urls: [
+               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`,
+               browser.extension.getURL("assets/YTObserver-mainDB.txt")
+             ]
+           },
+           YTOBSERVER_SMM: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/ytsmm.png"),
+             text: "С списках SMM ботов YTObserver/Metabot for youtube",
+             type: "text",
+             urls: [
+               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`,
+               browser.extension.getURL("assets/YTObserver_smm_all.txt")
+             ]
+           }
+         },
+         twitter: {
+           POROHOBOTY_PIDORY: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/ukrobot.png"),
+             text: "В списках #ПОРОХОБОТЫПИДОРЫ",
+             type: "json",
+             urls: [ browser.extension.getURL("assets/PorohoBoty_pidory_list.json") ]
+           },
+           L_BUTTERS_STOTCH: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/butters.png"),
+             text: "В списке ботов/мракобесов Л.Баттерса Стотча",
+             type: "json",
+             urls: [ browser.extension.getURL("assets/L_Butters_Stotch_List.json") ]
+           },
+           ANTIBOT4NAVALNY: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/antibot4navalny.png"),
+             text: "В списках кремлеботов antibot4navalny",
+             type: "text",
+             urls: [
+               `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`,
+               browser.extension.getURL("assets/antibot4navalny.txt")
+             ]
+           },
+           NASHACANADA: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/nasha_canada_bots.png"),
+             text: "В списках ботов, ваты и долбаебов @NashaCanada",
+             type: "json",
+             urls: [ browser.extension.getURL("assets/nasha_canada_bots.json") ]
+           },
+           KARATEL: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/karatel.png"),
+             text: "В списках Карателя",
+             url: `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+           }
+       },
+       vk: {},
+      },
+      api: {
+        youtube: {},
+        twitter: {
+          KARATEL: {
+            active: true,
+            icon_url: browser.extension.getURL("assets/karatel.png"),
+            text: "В списках Карателя",
+            url: `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+          }
+        },
+        vk: {}
+      }
+    }
+  }
+
   }
 
   getServer() {
@@ -50,25 +133,25 @@ class CyberdonosBackgroundJS {
   }
 
   loadTwitterLists() {
-    return fetch(browser.extension.getURL("assets/L_Butters_Stotch_List.json"))
-           .then(LButtersStotchRaw => LButtersStotchRaw.json())
-           .then(LButtersStotchData =>  {
-             this.LISTS.twitter.L_BUTTERS_STOTCH = LButtersStotchData
-             return fetch(browser.extension.getURL("assets/PorohoBoty_pidory_list.json"))
-           })
-           .then(PorohoBotyRaw => PorohoBotyRaw.json())
-           .then(PorohoBotyData => {
-             this.LISTS.twitter.POROHOBOTY_PIDORY = PorohoBotyData
+    const listPromises = []
+    Object.keys(this.CONFIG.lists.lists.twitter).filter(e => e !== 'KARATEL').forEach(key => {
+      this.CONFIG.lists.lists.twitter[key].urls.forEach(url => listPromises.push(fetch(url)))
+    })
+    return Promise.all(listPromises)
+           .then(rawData => {
              return Promise.all([
-               fetch(this.ANTIBOT4NAVALNY_LIST_URL),
-               fetch(this.ANTIBOT4NAVALNY_LIST_BACKUP_URL)
+               rawData[0].json(),
+               rawData[1].json(),
+               rawData[2].status === 200 ? rawData[2].text() : rawData[3].text(),
+               rawData[4].json()
              ])
            })
-           .then(antibot4navalnyRawData => {
-             const rawDataAntibot4navalny = antibot4navalnyRawData[0].status === 200 ? antibot4navalnyRawData[0] : antibot4navalnyRawData[1]
-             return rawDataAntibot4navalny.text()
+           .then(results => {
+             this.LISTS.twitter.POROHOBOTY_PIDORY = results[0]
+             this.LISTS.twitter.L_BUTTERS_STOTCH = results[1]
+             this.LISTS.twitter.ANTIBOT4NAVALNY = results[2].split("\n") || []
+             this.LISTS.twitter.NASHACANADA = results[3]
            })
-           .then(antibot4navalny => this.LISTS.twitter.ANTIBOT4NAVALNY = antibot4navalny.split("\n"))
            .catch(e => console.error(e))
   }
 
@@ -118,6 +201,15 @@ class CyberdonosBackgroundJS {
            })
   }
 
+  createDefaultOrLoadConfig() {
+    if (!localStorage.getItem("config")) {
+      localStorage["config"] = JSON.stringify(this.CONFIG)
+    }
+    else {
+      this.CONFIG = JSON.parse(localStorage["config"])
+    }
+  }
+
   getCreatedDateAndLastModified(vkId) {
     //console.log(`Получение данных о регистрации и логине для ${vkId}`)
     return new Promise((resolve, reject) => {
@@ -155,45 +247,71 @@ class CyberdonosBackgroundJS {
            .then((response) => response.json())
   }
 
+  processKaratelResponse(response) {
+    const lowerCasedResult = response.toLowerCase()
+    const parsed = JSON.parse(lowerCasedResult)
+    let result = false
+    if (parsed && parsed.banned && parsed.banned === true) {
+      result = true
+    }
+    return result
+  }
+
   getByTwitterId(userId) {
     let result = { }
-    return fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS)
-          .then(response => response.json())
-          .then(_result => {
-            result = _result
-            return fetch(this.KARATEL_GET_BY_ID_URL + userId)
-          })
-          .then(_response => _response.text())
-          .then(__result => {
-            const lowerCasedResult = __result.toLowerCase()
-            const parsed = JSON.parse(lowerCasedResult)
-            if (parsed && parsed.banned && parsed.banned === true) {
-              if (!result.data) {
-                result.data = { }
-              }
-              result.data.IsInKaratelDb = true
-            }
-            if (this.LISTS.twitter.L_BUTTERS_STOTCH.indexOf(userId) !== -1) {
-              if (!result.data) {
-                result.data = { }
-              }
-              result.data.IsInLButterStotchList = true
-            }
-            if (this.LISTS.twitter.POROHOBOTY_PIDORY.indexOf(userId) !== -1) {
-              if (!result.data) {
-                result.data = { }
-              }
-              result.data.IsInPorohoBotyPidoryList = true
-            }
-            if (this.LISTS.twitter.ANTIBOT4NAVALNY.indexOf(userId) !== -1) {
-              if (!result.data) {
-                result.data = { }
-              }
-              result.data.IsInAntibot4navalnyList = true
-            }
-            return result
-          })
-          .catch(e => console.error(e))
+
+    return Promise.all([
+             fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS),
+             fetch(this.KARATEL_GET_BY_ID_URL + userId)
+           ])
+           .then((rawResults) => {
+             return Promise.all([
+               rawResults[0].json(),
+               rawResults[1].text()
+             ])
+           })
+           .then((results) => {
+             result = results[0]
+             if (this.processKaratelResponse(results[1])) {
+               if (!result.data) {
+                 result.data = { }
+                 result.data.inLists = [ ]
+               }
+               else {
+                 result.data.inLists = [ ]
+               }
+               result.data.inLists.push('KARATEL')
+             }
+             const lists = this.findTwitterIdInLists(userId)
+             if (lists.length > 0) {
+               if (!result.data) {
+                 result.data = { }
+                 result.data.inLists = [ ]
+               }
+               else {
+                 if (!result.data.inLists) {
+                   result.data.inLists = [ ]
+                 }
+               }
+               lists.forEach(listElement => result.data.inLists.push(listElement))
+             }
+             console.log(result)
+             return result
+           })
+           .catch(e => console.error(e))
+  }
+
+  findTwitterIdInLists(id) {
+    const listNames = Object.keys(this.LISTS.twitter).filter(e => e !== 'KARATEL')
+    const inLists = []
+    for (let i = 0; i < listNames.length; i++) {
+      if (this.CONFIG.lists.lists.twitter[listNames[i]].active) {
+        if (this.LISTS.twitter[listNames[i]].indexOf(id) !== -1) {
+          inLists.push(listNames[i])
+        }
+      }
+    }
+    return inLists
   }
 
   getByYTUser(id) {
@@ -228,9 +346,12 @@ class CyberdonosBackgroundJS {
 
   start() {
     this.loadTwitterLists()//.then(() => console.log(this.LISTS))
-    this.loadYoutubeLists().then(() => console.log(this.LISTS))
+    this.loadYoutubeLists()//.then(() => console.log(this.LISTS))
+    // инициализация дефолтных настроек для списков
+    this.createDefaultOrLoadConfig()
     fetch(`${this.HOSTNAME}/api/v1/status/get`)
     .then(() => {
+
       if (localStorage.getItem("token") && localStorage.getItem("role")) {
         console.log(`Токен ${localStorage.getItem("token")} и роль уже установлены ${localStorage.getItem("role")}`)
         this.HEADERS.headers.token = localStorage.getItem("token")
@@ -263,7 +384,7 @@ class CyberdonosBackgroundJS {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log(request)
       if (request.action === 'getSystemData') {
-        sendResponse({ tags: this.TAGS, server: this.HOSTNAME, statuses: this.STATUSES })
+        sendResponse({ tags: this.TAGS, server: this.HOSTNAME, statuses: this.STATUSES, config: this.CONFIG })
       }
       else if (request.action === "getAccountData") {
         sendResponse({
@@ -378,6 +499,10 @@ class CyberdonosBackgroundJS {
                 })
               })
               .catch(e => console.error(e))
+      }
+      else if (request.action === 'saveConfig' && request.data) {
+        this.CONFIG = request.data
+        localStorage["config"] = JSON.stringify(this.CONFIG)
       }
       else {
         console.log(`неверный action ${JSON.stringify(request)}`)

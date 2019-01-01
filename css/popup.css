@@ -1,3 +1,16 @@
 div.donate {
   display: none;
 }
+
+ul.twitter-lists-ul li {
+  display: inline;
+}
+
+ul.twitter-lists-ul {
+  list-style-type: none;
+}
+div.twitter-list-div {
+  display: inline;
+  float: left;
+  margin: 0;
+}

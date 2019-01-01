@@ -1,12 +1,48 @@
+var config
+
 const getAccountData = () => {
 
   return browser.runtime.sendMessage({ action: "getAccountData" })
-  .then((result) => {
-    console.log(`Получены данные об аккаунте ${JSON.stringify(result)}`)
-    document.querySelector(`span.role`).textContent = result.role_name
-    document.querySelector(`input.token`).value = result.token
-  })
+        .then((result) => {
+          console.log(`Получены данные об аккаунте ${JSON.stringify(result)}`)
+          document.querySelector(`span.role`).textContent = result.role_name
+          document.querySelector(`input.token`).value = result.token
+          return browser.runtime.sendMessage({ action: "getSystemData" })
+        })
+        .then((systemDataResults) => {
+          //console.log(systemDataResults);
+          config = systemDataResults.config
+          const listsNames = Object.keys(config.lists.lists.twitter)
+          const div = document.getElementsByClassName('twitter-lists')[0]
+          listsNames.forEach(listName => {
+            const e = config.lists.lists.twitter[listName]
+            const cb = document.createElement('input')
+            cb.type = 'checkbox'
+            cb.checked = e.active
+            cb.name = listName
+            cb.id = listName
+            const label = document.createElement('label')
+            label.setAttribute('for', listName)
+            label.appendChild(document.createTextNode(listName))
+            const nestedDiv = document.createElement('div')
+            nestedDiv.setAttribute('class', 'twitter-list-div')
+            nestedDiv.appendChild(cb)
+            div.appendChild(nestedDiv)
+            div.appendChild(label)
+          })
+          document.getElementsByClassName('updateInterval')[0].value = parseInt(config.updateInterval)
+        })
 }
+
+document.querySelector(`button.save-config`).addEventListener('click', () => {
+  config.updateInterval = parseInt(document.querySelector('.updateInterval').value)
+  Object.keys(config.lists.lists.twitter).forEach(k => {
+    const cb = document.getElementById(k)
+    config.lists.lists.twitter[k].active = cb.checked
+  })
+  browser.runtime.sendMessage({ action: "saveConfig", data: config })
+})
+
 document.querySelector(`button.set-token`).addEventListener('click', () => {
   const token = document.querySelector(`input.token`).value
   if (/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/.test(token)) {
