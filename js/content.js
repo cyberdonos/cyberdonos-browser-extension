@@ -555,18 +555,6 @@ class CyberdonosContentJSListener {
             document.querySelector(`div.cd-proof-popup`).style.display = 'block'
           })
         }
-        if (user.IsInKaratelDb) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/karatel.png")}" title="В базе карателя" class="cyberdonos-tag" />`)
-        }
-        if (user.IsInLButterStotchList) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/butters.png")}" title="Бот/Мракобес из списка Л. Баттерс Стотч" class="cyberdonos-tag" />`)
-        }
-        if (user.IsInPorohoBotyPidoryList) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ukrobot.png")}" title="Укробот/Порохобот из #ПОРОХОБОТЫПИДОРЫ" class="cyberdonos-tag" />`)
-        }
-        if (user.IsInAntibot4navalnyList) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/antibot4navalny.png")}" title="Кремлебот из списка antibot4navalny" class="cyberdonos-tag" />`)
-        }
         if (user.IsInYTOBSERVER_MANDBList) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytkremlebot.png")}" title="Кремлебот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
         }
@@ -582,23 +570,23 @@ class CyberdonosContentJSListener {
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
         }
-        if (user.status_id >= 0) {
-          const status = this.STATUSES.find(e => e.id === user.status_id)
-          const statusUrl = `assets/${status.file}.png`
-          cyberdonosTags.insertAdjacentHTML(
-            'afterend',
-            `<img src="${browser.extension.getURL(statusUrl)}" title="${status.name}" class="cyberdonos-tag">`
-          )
-          // Добавляем Abuse
-          cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/abuse.png")}" class="cyberdonos-tag cyberdonos-abuse cursor-pointer" id="${userId}" title="Пожаловаться/предложить исправления. Также можете отправить на email cyberdonos@protonmail.com" />`)
-
-          // cyberdonosTags.querySelector(`img.cyberdonos-abuse`).addEventListener('click', () => {
-          //   document.querySelector(`div.cd-abuse-user-id`).value = userId
-          //   document.querySelector(`input.cd-abuse-type`).value = this.TYPE
-          //   document.querySelector(`div.cd-abuse-popup`).style.display = 'block'
-          // })
-          // Конец Abuse
-        }
+        // if (user.status_id >= 0) {
+        //   const status = this.STATUSES.find(e => e.id === user.status_id)
+        //   const statusUrl = `assets/${status.file}.png`
+        //   cyberdonosTags.insertAdjacentHTML(
+        //     'afterend',
+        //     `<img src="${browser.extension.getURL(statusUrl)}" title="${status.name}" class="cyberdonos-tag">`
+        //   )
+        //   // Добавляем Abuse
+        //   cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/abuse.png")}" class="cyberdonos-tag cyberdonos-abuse cursor-pointer" id="${userId}" title="Пожаловаться/предложить исправления. Также можете отправить на email cyberdonos@protonmail.com" />`)
+        //
+        //   // cyberdonosTags.querySelector(`img.cyberdonos-abuse`).addEventListener('click', () => {
+        //   //   document.querySelector(`div.cd-abuse-user-id`).value = userId
+        //   //   document.querySelector(`input.cd-abuse-type`).value = this.TYPE
+        //   //   document.querySelector(`div.cd-abuse-popup`).style.display = 'block'
+        //   // })
+        //   // Конец Abuse
+        // }
         if (user.registerDate && user.lastLoggedIn) {
           if (!cyberdonosTags.querySelector('.vk-registration-date')) {
             cyberdonosTags.insertAdjacentHTML(

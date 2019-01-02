@@ -27,15 +27,8 @@ class CyberdonosBackgroundJS {
       },
       youtube: {},
       vk: {}
-     }
+    }
 
-   this.ANTIBOT4NAVALNY_LIST_URL = `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`
-   this.ANTIBOT4NAVALNY_LIST_BACKUP_URL = browser.extension.getURL("assets/antibot4navalny.txt")
-   this.YTOBSERVER_MAINDB_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`
-   this.YTOBSERVER_MAINDB_BACKUP_URL = browser.extension.getURL("assets/YTObserver-mainDB.txt")
-   this.YTOBSERVER_SMM_ALL_URL = `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`
-   this.YTOBSERVER_SMM_ALL_BACKUP_URL = browser.extension.getURL("assets/YTObserver_smm_all.txt")
-   this.NASHACANADA_LIST_URL = browser.extension.getURL("assets/nasha_canada_bots.json")
    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
    this.CONFIG = {
      updateInterval: 5000,
@@ -156,12 +149,11 @@ class CyberdonosBackgroundJS {
   }
 
   loadYoutubeLists() {
-    return Promise.all([
-             fetch(this.YTOBSERVER_MAINDB_URL),
-             fetch(this.YTOBSERVER_MAINDB_BACKUP_URL),
-             fetch(this.YTOBSERVER_SMM_ALL_URL),
-             fetch(this.YTOBSERVER_SMM_ALL_BACKUP_URL)
-           ])
+    const listPromises = []
+    Object.keys(this.CONFIG.lists.lists.youtube).forEach(key => {
+      this.CONFIG.lists.lists.youtube[key].urls.forEach(url => listPromises.push(fetch(url)))
+    })
+    return Promise.all(listPromises)
            .then(ytresultsRaw => {
              const mainDBRaw = ytresultsRaw[0].status === 200 ? ytresultsRaw[0] : ytresultsRaw[1]
              const SMMALLRaw = ytresultsRaw[2].status === 200 ? ytresultsRaw[2] : ytresultsRaw[3]
@@ -414,10 +406,6 @@ class CyberdonosBackgroundJS {
         .catch(e => console.error(e))
       }
       else if (request.action === 'getYoutubeUser' && request.id) {
-        // return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${request.id}`, this.HEADERS)
-        //        .then((response) => response.json())
-        //        .catch(e => console.error(e))
-        console.log(1111111);
         return this.getByYTUser(request.id)
                .catch(e => console.error(e))
       }
