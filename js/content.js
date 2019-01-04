@@ -364,7 +364,7 @@ class CyberdonosContentJSListener {
           Promise.all(getUsersP)
           .then((results) => {
             results.forEach(result => {
-              if (result.data) {
+              if (result && result.data) {
                 this.PERSONS.youtube[result.data.youtube_id] = result.data
               }
             })
@@ -472,12 +472,13 @@ class CyberdonosContentJSListener {
         nameWhenAdded = element.querySelector(whereToGetName).textContent.trim()
       }
     }
-    // добавляем поиск по top30
+    // добавляем поиск по top30 и дату регистрации
     if (this.TYPE === 'youtube') {
       element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
         'beforeend',
         `<a href="${this.top30url}s=server:youtube.com ${encodeURIComponent(nameWhenAdded)}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти упоминания юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
       )
+      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag">Регистрация: ${this.PERSONS[this.TYPE][userId] ? this.PERSONS[this.TYPE][userId].registration_date : "Ошибка" }</b>`)
     }
     if (this.TYPE === 'vk') {
       if (!element.querySelector('a.cyberdonos-vk-mentions')) {
@@ -533,7 +534,9 @@ class CyberdonosContentJSListener {
       }
       whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
       const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
-      if (this.PERSONS[this.TYPE][userId]) {
+
+      if (this.PERSONS[this.TYPE][userId] && this.PERSONS[this.TYPE][userId].tags) {
+        console.log(this.PERSONS[this.TYPE]);
         const user = this.PERSONS[this.TYPE][userId]
         if (user.tags) {
           const tagIds = JSON.parse(user.tags)
@@ -569,6 +572,9 @@ class CyberdonosContentJSListener {
         }
         if (user.name_when_added) {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
+        }
+        if (user.registration_date) {
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag">Регистрация: ${user.registration_date}</b>`)
         }
         // if (user.status_id >= 0) {
         //   const status = this.STATUSES.find(e => e.id === user.status_id)

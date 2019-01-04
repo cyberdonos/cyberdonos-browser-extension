@@ -1,6 +1,6 @@
 {
   "name": "cyberdonos",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "manifest_version": 2,
   "homepage_url": "https://github.com/cyberdonos/cyberdonos-browser-extension",
   "description": "Идентификация и добавление кремлеботов, проплаченных и других способствующих укреплению режима людей во вконтакте, twitter, youtube.",
