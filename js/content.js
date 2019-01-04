@@ -535,8 +535,8 @@ class CyberdonosContentJSListener {
       whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
       const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
 
-      if (this.PERSONS[this.TYPE][userId] && this.PERSONS[this.TYPE][userId].tags) {
-        console.log(this.PERSONS[this.TYPE]);
+      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || this.PERSONS[this.TYPE][userId].inLists)) {
+        //console.log(this.PERSONS[this.TYPE]);
         const user = this.PERSONS[this.TYPE][userId]
         if (user.tags) {
           const tagIds = JSON.parse(user.tags)
