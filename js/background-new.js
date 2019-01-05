@@ -29,6 +29,12 @@ class CyberdonosBackgroundJS {
       vk: {}
     }
 
+    this.CACHE = {
+      "youtube": {},
+      "vk": {},
+      "twitter": {}
+    }
+
    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
    this.CONFIG = {
      updateInterval: 5000,
@@ -215,8 +221,8 @@ class CyberdonosBackgroundJS {
         else {
           try {
             const xml = new window.DOMParser().parseFromString(str, "text/xml")
-            const registerDate = dayjs(xml.getElementsByTagName("ya:created")[0].getAttribute("dc:date")).format("DD.MM.YY") || "null"
-            const lastLoginDate = dayjs(xml.getElementsByTagName("ya:lastLoggedIn")[0].getAttribute("dc:date")).format("DD.MM.YY") || "null"
+            const registerDate = xml.getElementsByTagName("ya:created").length > 0 ? dayjs(xml.getElementsByTagName("ya:created")[0].getAttribute("dc:date")).format("DD.MM.YY") : "null"
+            const lastLoginDate = xml.getElementsByTagName("ya:lastLoggedIn").length > 0 ? dayjs(xml.getElementsByTagName("ya:lastLoggedIn")[0].getAttribute("dc:date")).format("DD.MM.YY") : "null"
             resolve({ registerDate: registerDate, lastLoggedIn: lastLoginDate })
           } catch (e) {
             console.error(e)
@@ -234,9 +240,20 @@ class CyberdonosBackgroundJS {
            .catch(e => console.error(`Ошибка при получении тегов. ${e}`))
   }
 
-  getPersonByVkId (vkId) {
-    return fetch(`${this.HOSTNAME}/api/v1/persons/get/vk/${vkId}`, this.HEADERS)
-           .then((response) => response.json())
+  getPersonByVkId(vkId, force = false) {
+    if (this.CACHE["vk"][vkId] && !force) {
+      return new Promise((resolve, reject) => resolve(this.CACHE["vk"][vkId]))
+    }
+    else {
+      return fetch(`${this.HOSTNAME}/api/v1/persons/get/vk/${vkId}`, this.HEADERS)
+             .then((response) => response.json())
+             .then((data) => {
+               this.CACHE["vk"][vkId] = data
+               return new Promise((resolve, reject) => resolve(data))
+             })
+             .catch(e => console.error(e))
+    }
+
   }
 
   processKaratelResponse(response) {
@@ -249,48 +266,54 @@ class CyberdonosBackgroundJS {
     return result
   }
 
-  getByTwitterId(userId) {
-    let result = { }
-
-    return Promise.all([
-             fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS),
-             fetch(this.KARATEL_GET_BY_ID_URL + userId)
-           ])
-           .then((rawResults) => {
-             return Promise.all([
-               rawResults[0].json(),
-               rawResults[1].text()
+  getByTwitterId(userId, force = false) {
+    if (this.CACHE["twitter"][userId] && !force) {
+      // console.log('из кэша')
+      return new Promise((resolve, reject) => resolve(this.CACHE["twitter"][userId]))
+    }
+    else {
+      let result = { }
+      return Promise.all([
+               fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS),
+               fetch(this.KARATEL_GET_BY_ID_URL + userId)
              ])
-           })
-           .then((results) => {
-             result = results[0]
-             if (this.processKaratelResponse(results[1])) {
-               if (!result.data) {
-                 result.data = { }
-                 result.data.inLists = [ ]
-               }
-               else {
-                 result.data.inLists = [ ]
-               }
-               result.data.inLists.push('KARATEL')
-             }
-             const lists = this.findTwitterIdInLists(userId)
-             if (lists.length > 0) {
-               if (!result.data) {
-                 result.data = { }
-                 result.data.inLists = [ ]
-               }
-               else {
-                 if (!result.data.inLists) {
+             .then((rawResults) => {
+               return Promise.all([
+                 rawResults[0].json(),
+                 rawResults[1].text()
+               ])
+             })
+             .then((results) => {
+               result = results[0]
+               if (this.processKaratelResponse(results[1])) {
+                 if (!result.data) {
+                   result.data = { }
                    result.data.inLists = [ ]
                  }
+                 else {
+                   result.data.inLists = [ ]
+                 }
+                 result.data.inLists.push('KARATEL')
                }
-               lists.forEach(listElement => result.data.inLists.push(listElement))
-             }
-             console.log(result)
-             return result
-           })
-           .catch(e => console.error(e))
+               const lists = this.findTwitterIdInLists(userId)
+               if (lists.length > 0) {
+                 if (!result.data) {
+                   result.data = { }
+                   result.data.inLists = [ ]
+                 }
+                 else {
+                   if (!result.data.inLists) {
+                     result.data.inLists = [ ]
+                   }
+                 }
+                 lists.forEach(listElement => result.data.inLists.push(listElement))
+               }
+               //console.log(result)
+               this.CACHE["twitter"][userId] = result
+               return result
+             })
+             .catch(e => console.error(e))
+    }
   }
 
   findTwitterIdInLists(id) {
@@ -306,33 +329,41 @@ class CyberdonosBackgroundJS {
     return inLists
   }
 
-  getByYTUser(id) {
-    let result = { }
-    return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${id}`, this.HEADERS)
-           .then(response => response.json())
-           .then(_result => {
-             console.log(_result)
-             result = _result
-             if (this.LISTS.youtube.YTOBSERVER_MAINDB[id]) {
-               if (!result.data) {
-                 result.data = { }
-                 result.data.youtube_id = id
+  getByYTUser(id, force = false) {
+    if (this.CACHE["youtube"][id] && !force) {
+      //console.log(`Получение из кэша ${id}, ${JSON.stringify(this.CACHE["youtube"][id])}`)
+      return new Promise((resolve, reject) => resolve(this.CACHE["youtube"][id]))
+    }
+    else {
+      //console.log(`Получение с удаленного сервера ${id}`)
+      let result = { }
+      return fetch(`${this.HOSTNAME}/api/v1/persons/get/youtube/${id}`, this.HEADERS)
+             .then(response => response.json())
+             .then(_result => {
+               //console.log(_result)
+               result = _result
+               if (this.LISTS.youtube.YTOBSERVER_MAINDB[id]) {
+                 if (!result.data) {
+                   result.data = { }
+                   result.data.youtube_id = id
+                 }
+                 result.data.IsInYTOBSERVER_MANDBList = true
+                 result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_MAINDB[id] : this.LISTS.youtube.YTOBSERVER_MAINDB[id]
                }
-               result.data.IsInYTOBSERVER_MANDBList = true
-               result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_MAINDB[id] : this.LISTS.youtube.YTOBSERVER_MAINDB[id]
-             }
-             if (this.LISTS.youtube.YTOBSERVER_SMM[id]) {
-               if (!result.data) {
-                 result.data = { }
-                 result.data.youtube_id = id
+               if (this.LISTS.youtube.YTOBSERVER_SMM[id]) {
+                 if (!result.data) {
+                   result.data = { }
+                   result.data.youtube_id = id
+                 }
+                 result.data.IsInYTOBSERVERSMMList = true
+                 result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_SMM[id] : this.LISTS.youtube.YTOBSERVER_SMM[id]
                }
-               result.data.IsInYTOBSERVERSMMList = true
-               result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_SMM[id] : this.LISTS.youtube.YTOBSERVER_SMM[id]
-             }
-             console.log(result)
-             return result
-           })
-           .catch(e => console.error(e))
+               //console.log(result)
+               this.CACHE["youtube"][id] = result
+               return result
+             })
+             .catch(e => console.error(e))
+    }
   }
 
 
@@ -415,7 +446,8 @@ class CyberdonosBackgroundJS {
                .catch(e => console.error(e))
       }
       else if (request.action === "addPerson" && request.data && request.type) {
-        console.log("request data - ", request.data)
+        console.log("request data - ", request)
+        let insertResult = null
         return fetch(`${this.HOSTNAME}/api/v1/persons/${request.type}/add`,
                     {
                       headers: {
@@ -427,10 +459,18 @@ class CyberdonosBackgroundJS {
                   )
                   .then(response => response.json())
                   .then(data => {
-                    return new Promise((resolve, reject) => {
-                      resolve(data)
-                    })
+                    insertResult = data
+                    if (request.type === "twitter") {
+                      return this.getByTwitterId(request.data.id, true)
+                    }
+                    else if (request.type === "youtube") {
+                      return this.getByYTUser(request.data.id, true)
+                    }
+                    else if (request.type === "vk") {
+                      return this.getPersonByVkId(request.data.id, true)
+                    }
                   })
+                  .then(() => insertResult)
                   .catch(e => console.error(`error when adding person: ${e}`))
       }
       else if (request.action === "editPerson") {

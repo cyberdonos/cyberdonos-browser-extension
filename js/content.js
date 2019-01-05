@@ -66,7 +66,8 @@ class CyberdonosContentJSListener {
         try {
           if (comments.length > 0) {
             for (let i = 0; i < comments.length; i++) {
-              if (userId === comments[i].querySelector(`a.author`).getAttribute('data-from-id')) {
+              const commentAuthorElement = comments[i].querySelector(`a.author`)
+              if (commentAuthorElement && userId === commentAuthorElement.getAttribute('data-from-id')) {
                 this.insertTags(comments[i], userId, 'div.reply_author', 'a.author')
               }
             }
@@ -99,7 +100,8 @@ class CyberdonosContentJSListener {
         try {
           if (posts.length > 0) {
             for (let i = 0; i < posts.length; i++) {
-              if (posts[i] && posts[i].querySelector('a.author').getAttribute('data-from-id') === userId) {
+              const postAuhtorEl = posts[i].querySelector('a.author')
+              if (postAuhtorEl && posts[i] && postAuhtorEl.getAttribute('data-from-id') === userId) {
                 this.insertTags(posts[i], userId, 'div.like_cont', 'a.author')
               }
             }
@@ -353,9 +355,12 @@ class CyberdonosContentJSListener {
         if (this.TYPE === "youtube") {
           let userIds = []
           for (let i = 0; i < selector.length; i++) {
-            let userId = selector[i].querySelector('a#author-text').getAttribute('href').split('/').pop()
-            if (userIds.indexOf(userId) === -1 && this.PERSONS.youtube[userId] === undefined) {
-              userIds.push(userId)
+            let authorTextHref = selector[i].querySelector('a#author-text').getAttribute('href')
+            if (authorTextHref) {
+              let userId = authorTextHref.split('/').pop()
+              if (userIds.indexOf(userId) === -1 && this.PERSONS.youtube[userId] === undefined) {
+                userIds.push(userId)
+              }
             }
           }
           console.log(`${userIds.length} uniq userIds`)
@@ -393,7 +398,7 @@ class CyberdonosContentJSListener {
             }
           }
           console.log(`Найдено ${userIds.length} новых пользователей`)
-          //console.log(userIds)
+          //console.log('usersIds', userIds)
           Promise.all(userIds.map(u => browser.runtime.sendMessage({ action: "getPersonByVkId", data: u })))
           .then((results) => {
             //console.log(results)
@@ -405,9 +410,6 @@ class CyberdonosContentJSListener {
             resolve()
           })
           .catch(e => console.error(e))
-        }
-        else if (this.TYPE === "facebook") {
-
         }
         else if (this.TYPE === "twitter") {
           let userIds = []
@@ -488,23 +490,8 @@ class CyberdonosContentJSListener {
         )
       }
     }
-    if (this.TYPE === 'twitter') {
-      let username = element.querySelector('span.username > b').textContent || null
-      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
-        'beforeend',
-        `<a href="${this.top30url}s=server:twitter.com ${username}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
-      )
-    }
+
     element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
-      //document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
-      // this.SELECT_TAGS = new Choices(document.getElementsByClassName("cd-select-tags")[0], {
-      //   removeItems: true,
-      //   removeItemButton: true,
-      //   maxItemCount: 5
-      // })
-      // this.SELECT_TAGS = new Taggle('cd-select-tags', {
-      //   tags: this.TAGS.map(t => t.name)
-      // })
       document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
       // запоняем скрытые поля
       document.querySelector(`input.cd-name_when_added`).value = nameWhenAdded
@@ -535,9 +522,10 @@ class CyberdonosContentJSListener {
       whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
       const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
 
-      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || this.PERSONS[this.TYPE][userId].inLists)) {
+      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || this.PERSONS[this.TYPE][userId].inLists || (this.PERSONS[this.TYPE][userId].registerDate && this.PERSONS[this.TYPE][userId].lastLoggedIn) )) {
         //console.log(this.PERSONS[this.TYPE]);
         const user = this.PERSONS[this.TYPE][userId]
+        //console.log(user);
         if (user.tags) {
           const tagIds = JSON.parse(user.tags)
           tagIds.forEach((tagId) => {
