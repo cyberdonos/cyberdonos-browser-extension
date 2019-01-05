@@ -13,4 +13,10 @@ div.twitter-list-div {
   display: inline;
   float: left;
   margin: 0;
+  clear: left;
+  padding: 0px;
+}
+
+label.twitter-list-element {
+  float: right;
 }
