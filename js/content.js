@@ -144,7 +144,8 @@ class CyberdonosContentJSListener {
         for (let i = 0; i < userIds.length; i++) {
           const userId = userIds[i]
           for (let i = 0; i < comments.length; i++) {
-            if (userId === comments[i].querySelector('a#author-text').getAttribute('href').split('/').pop()) {
+            const authorTextElement = comments[i].querySelector('a#author-text')
+            if (authorTextElement && (userId === authorTextElement.getAttribute('href').split('/').pop())) {
               this.insertTags(comments[i], userId, 'div#toolbar', 'span.ytd-comment-renderer')
             }
           }
@@ -480,7 +481,9 @@ class CyberdonosContentJSListener {
         'beforeend',
         `<a href="${this.top30url}s=server:youtube.com ${encodeURIComponent(nameWhenAdded)}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти упоминания юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
       )
-      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag">Регистрация: ${this.PERSONS[this.TYPE][userId] ? this.PERSONS[this.TYPE][userId].registration_date : "Ошибка" }</b>`)
+      if (!element.querySelector(`div.cyberdonos-tags`).querySelector('b.yt-registration-date')) {
+        element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${this.PERSONS[this.TYPE][userId] ? this.PERSONS[this.TYPE][userId].registration_date : "Ошибка" }</b>`)
+      }
     }
     if (this.TYPE === 'vk') {
       if (!element.querySelector('a.cyberdonos-vk-mentions')) {
@@ -521,11 +524,15 @@ class CyberdonosContentJSListener {
       }
       whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
       const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
-
-      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || this.PERSONS[this.TYPE][userId].inLists || (this.PERSONS[this.TYPE][userId].registerDate && this.PERSONS[this.TYPE][userId].lastLoggedIn) )) {
+      //console.log(this.PERSONS[this.TYPE][userId]);
+      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || (this.PERSONS[this.TYPE][userId].inLists && this.PERSONS[this.TYPE][userId].inLists.length > 0)  || (this.PERSONS[this.TYPE][userId].registerDate && this.PERSONS[this.TYPE][userId].lastLoggedIn) )) {
         //console.log(this.PERSONS[this.TYPE]);
         const user = this.PERSONS[this.TYPE][userId]
         //console.log(user);
+        // фикс для юзеров на ютюбе не состоящих в списках
+        if (user.inLists && user.inLists.length === 0 && !user.proof) {
+          this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
+        }
         if (user.tags) {
           const tagIds = JSON.parse(user.tags)
           tagIds.forEach((tagId) => {
@@ -546,12 +553,6 @@ class CyberdonosContentJSListener {
             document.querySelector(`div.cd-proof-popup`).style.display = 'block'
           })
         }
-        if (user.IsInYTOBSERVER_MANDBList) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytkremlebot.png")}" title="Кремлебот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
-        }
-        if (user.IsInYTOBSERVERSMMList) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/ytsmm.png")}" title="SMM-бот из списка YTObserver/metabot for youtube" class="cyberdonos-tag" />`)
-        }
         if (user.inLists && user.inLists.length > 0) {
           user.inLists.forEach(list => {
             const meta = this.CONFIG.lists.lists[this.TYPE][list]
@@ -562,25 +563,8 @@ class CyberdonosContentJSListener {
           cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
         }
         if (user.registration_date) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag">Регистрация: ${user.registration_date}</b>`)
+          cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${user.registration_date}</b>`)
         }
-        // if (user.status_id >= 0) {
-        //   const status = this.STATUSES.find(e => e.id === user.status_id)
-        //   const statusUrl = `assets/${status.file}.png`
-        //   cyberdonosTags.insertAdjacentHTML(
-        //     'afterend',
-        //     `<img src="${browser.extension.getURL(statusUrl)}" title="${status.name}" class="cyberdonos-tag">`
-        //   )
-        //   // Добавляем Abuse
-        //   cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/abuse.png")}" class="cyberdonos-tag cyberdonos-abuse cursor-pointer" id="${userId}" title="Пожаловаться/предложить исправления. Также можете отправить на email cyberdonos@protonmail.com" />`)
-        //
-        //   // cyberdonosTags.querySelector(`img.cyberdonos-abuse`).addEventListener('click', () => {
-        //   //   document.querySelector(`div.cd-abuse-user-id`).value = userId
-        //   //   document.querySelector(`input.cd-abuse-type`).value = this.TYPE
-        //   //   document.querySelector(`div.cd-abuse-popup`).style.display = 'block'
-        //   // })
-        //   // Конец Abuse
-        // }
         if (user.registerDate && user.lastLoggedIn) {
           if (!cyberdonosTags.querySelector('.vk-registration-date')) {
             cyberdonosTags.insertAdjacentHTML(

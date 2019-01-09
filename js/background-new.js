@@ -168,10 +168,10 @@ class CyberdonosBackgroundJS {
            .then(ytObserverData => {
              const _ytobserverArrayMain = ytObserverData[0].split("\r\n").map(e => e.split("="))
              const _ytobserverArraySmm = ytObserverData[1].split("\r\n").map(e => e.split("="))
-             this.LISTS.youtube.YTOBSERVER_MAINDB = {}
-             this.LISTS.youtube.YTOBSERVER_SMM = {}
-             _ytobserverArrayMain.forEach(e => this.LISTS.youtube.YTOBSERVER_MAINDB[e[0]] = e[1])
-             _ytobserverArraySmm.forEach(e => this.LISTS.youtube.YTOBSERVER_SMM[e[0]] = e[1])
+             this.LISTS.youtube.YTOBSERVER_MAINDB = []
+             this.LISTS.youtube.YTOBSERVER_SMM = []
+             _ytobserverArrayMain.forEach(e => this.LISTS.youtube.YTOBSERVER_MAINDB.push(e[0]))
+             _ytobserverArraySmm.forEach(e => this.LISTS.youtube.YTOBSERVER_SMM.push(e[0]))
            })
            .catch(e => console.error(e))
   }
@@ -329,6 +329,19 @@ class CyberdonosBackgroundJS {
     return inLists
   }
 
+  findYTIdsInLists(id){
+    const listNames = Object.keys(this.LISTS.youtube)
+    const inLists = []
+    for (var i = 0; i < listNames.length; i++) {
+      if (this.CONFIG.lists.lists.youtube[listNames[i]].active) {
+        if (this.LISTS.youtube[listNames[i]].indexOf(id) !== -1) {
+          inLists.push(listNames[i])
+        }
+      }
+    }
+    return inLists
+  }
+
   getByYTUser(id, force = false) {
     if (this.CACHE["youtube"][id] && !force) {
       //console.log(`Получение из кэша ${id}, ${JSON.stringify(this.CACHE["youtube"][id])}`)
@@ -342,23 +355,10 @@ class CyberdonosBackgroundJS {
              .then(_result => {
                //console.log(_result)
                result = _result
-               if (this.LISTS.youtube.YTOBSERVER_MAINDB[id]) {
-                 if (!result.data) {
-                   result.data = { }
-                   result.data.youtube_id = id
-                 }
-                 result.data.IsInYTOBSERVER_MANDBList = true
-                 result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_MAINDB[id] : this.LISTS.youtube.YTOBSERVER_MAINDB[id]
+               if (!result.data) {
+                 result.data = { }
                }
-               if (this.LISTS.youtube.YTOBSERVER_SMM[id]) {
-                 if (!result.data) {
-                   result.data = { }
-                   result.data.youtube_id = id
-                 }
-                 result.data.IsInYTOBSERVERSMMList = true
-                 result.data.proof = result.data.proof ? result.data.proof + "; " + this.LISTS.youtube.YTOBSERVER_SMM[id] : this.LISTS.youtube.YTOBSERVER_SMM[id]
-               }
-               //console.log(result)
+               result.data.inLists = this.findYTIdsInLists(id)
                this.CACHE["youtube"][id] = result
                return result
              })
@@ -405,7 +405,7 @@ class CyberdonosBackgroundJS {
 
   startListener() {
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      console.log(request)
+      //console.log(request)
       if (request.action === 'getSystemData') {
         sendResponse({ tags: this.TAGS, server: this.HOSTNAME, statuses: this.STATUSES, config: this.CONFIG })
       }
