@@ -360,7 +360,7 @@ class CyberdonosBackgroundJS {
   findYTIdsInLists(id){
     const listNames = Object.keys(this.LISTS.youtube)
     const inLists = []
-    for (var i = 0; i < listNames.length; i++) {
+    for (let i = 0; i < listNames.length; i++) {
       if (this.CONFIG.lists.lists.youtube[listNames[i]].active) {
         if (this.LISTS.youtube[listNames[i]].indexOf(id) !== -1) {
           inLists.push(listNames[i])
