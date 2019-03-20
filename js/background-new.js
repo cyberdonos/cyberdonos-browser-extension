@@ -286,10 +286,14 @@ class CyberdonosBackgroundJS {
 
   processKaratelResponse(response) {
     const lowerCasedResult = response.toLowerCase()
-    const parsed = JSON.parse(lowerCasedResult)
     let result = false
-    if (parsed && parsed.banned && parsed.banned === true) {
-      result = true
+    try {
+      const parsed = JSON.parse(lowerCasedResult)
+      if (parsed && parsed.banned && parsed.banned === true) {
+        result = true
+      }
+    } catch (e) {
+      console.error("Ошибка при получении ответа от API-карателя:", e)
     }
     return result
   }
