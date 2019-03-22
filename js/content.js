@@ -356,7 +356,8 @@ class CyberdonosContentJSListener {
         if (this.TYPE === "youtube") {
           let userIds = []
           for (let i = 0; i < selector.length; i++) {
-            let authorTextHref = selector[i].querySelector('a#author-text').getAttribute('href')
+            let authorText = selector[i].querySelector('a#author-text')
+            let authorTextHref = authorText ? authorText.getAttribute('href') : null
             if (authorTextHref) {
               let userId = authorTextHref.split('/').pop()
               if (userIds.indexOf(userId) === -1 && this.PERSONS.youtube[userId] === undefined) {
