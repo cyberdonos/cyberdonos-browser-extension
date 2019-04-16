@@ -57,7 +57,7 @@ class CyberdonosBackgroundJS {
              text: "С списках SMM ботов YTObserver/Metabot for youtube",
              type: "text",
              urls: [
-               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_all.txt`,
+               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/additional_list_smm`,
                browser.extension.getURL("assets/YTObserver_smm_all.txt")
              ]
            },
@@ -67,18 +67,8 @@ class CyberdonosBackgroundJS {
              text: "С списках политических ботов YTObserver/Metabot for youtube",
              type: "text",
              urls: [
-               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/political_bots.txt`,
+               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/additional_list_political`,
                browser.extension.getURL("assets/YTObserver_political_bots.txt")
-             ]
-           },
-           YTOBSERVER_SMM_BOTS: {
-             active: true,
-             icon_url: browser.extension.getURL("assets/smm_bot.png"),
-             text: "С списках политических ботов YTObserver/Metabot for youtube",
-             type: "text",
-             urls: [
-               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/smm_bots.txt`,
-               browser.extension.getURL("assets/YTObserver_smm_bots.txt")
              ]
            }
          },
@@ -184,22 +174,18 @@ class CyberdonosBackgroundJS {
              const mainDBRaw = ytresultsRaw[0].status === 200 ? ytresultsRaw[0] : ytresultsRaw[1]
              const SMMALLRaw = ytresultsRaw[2].status === 200 ? ytresultsRaw[2] : ytresultsRaw[3]
              const SMMPoliticalRaw = ytresultsRaw[4].status === 200 ? ytresultsRaw[4] : ytresultsRaw[5]
-             const SMMBotsRaw = ytresultsRaw[6].status === 200 ? ytresultsRaw[6] : ytresultsRaw[7]
-             return Promise.all([mainDBRaw.text(), SMMALLRaw.text(), SMMPoliticalRaw.text(), SMMBotsRaw.text()])
+             return Promise.all([mainDBRaw.text(), SMMALLRaw.text(), SMMPoliticalRaw.text() ])
            })
            .then(ytObserverData => {
              const _ytobserverArrayMain = ytObserverData[0].split("\r\n").map(e => e.split("="))
              const _ytobserverArraySmm = ytObserverData[1].split("\r\n").map(e => e.split("="))
              const _ytobserverArrayPolitical = ytObserverData[2].split("\r\n").filter(e => !e.startsWith("//")).map(e => e.split("="))
-             const _ytobserverArraySmmBots = ytObserverData[3].split("\r\n").filter(e => !e.startsWith("//")).map(e => e.split("="))
              this.LISTS.youtube.YTOBSERVER_MAINDB = []
              this.LISTS.youtube.YTOBSERVER_SMM = []
              this.LISTS.youtube.YTOBSERVER_POLITICAL_BOTS = []
-             this.LISTS.youtube.YTOBSERVER_SMM_BOTS = []
              _ytobserverArrayMain.forEach(e => this.LISTS.youtube.YTOBSERVER_MAINDB.push(e[0]))
              _ytobserverArraySmm.forEach(e => this.LISTS.youtube.YTOBSERVER_SMM.push(e[0]))
              _ytobserverArrayPolitical.forEach(e => this.LISTS.youtube.YTOBSERVER_POLITICAL_BOTS.push(e[0]))
-             _ytobserverArraySmmBots.forEach(e => this.LISTS.youtube.YTOBSERVER_SMM_BOTS.push(e[0]))
            })
            .catch(e => console.error(e))
   }
