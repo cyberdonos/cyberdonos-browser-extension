@@ -77,20 +77,23 @@ class CyberdonosBackgroundJS {
              active: true,
              icon_url: browser.extension.getURL("assets/ukrobot.png"),
              text: "В списках #ПОРОХОБОТЫПИДОРЫ",
-             type: "json",
-             urls: [ browser.extension.getURL("assets/PorohoBoty_pidory_list.json") ]
+             type: "text",
+             urls: [
+               `https://pastebin.com/raw/t2fG8TT7`, 
+               browser.extension.getURL("assets/porohobotypidori.txt") 
+             ]
            },
            L_BUTTERS_STOTCH: {
-             active: true,
+             active: false,
              icon_url: browser.extension.getURL("assets/butters.png"),
-             text: "В списке ботов/мракобесов Л.Баттерса Стотча",
+             text: "В списке ботов/мракобесов Л.Баттерса Стотча - https://twitter.com/L_Stotch/status/1020894577341935616",
              type: "json",
              urls: [ browser.extension.getURL("assets/L_Butters_Stotch_List.json") ]
            },
            ANTIBOT4NAVALNY: {
              active: true,
              icon_url: browser.extension.getURL("assets/antibot4navalny.png"),
-             text: "В списках кремлеботов antibot4navalny",
+             text: "В списках кремлеботов antibot4navalny - https://twitter.com/antibot4navalny",
              type: "text",
              urls: [
                `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`,
@@ -100,7 +103,7 @@ class CyberdonosBackgroundJS {
            NASHACANADA: {
              active: true,
              icon_url: browser.extension.getURL("assets/nasha_canada_bots.png"),
-             text: "В списках ботов, ваты и долбаебов @NashaCanada",
+             text: "В списках ботов, ваты и долбаебов @NashaCanada - https://twitter.com/NashaCanada/status/1079629384976261120",
              type: "json",
              urls: [ browser.extension.getURL("assets/nasha_canada_bots.json") ]
            },
@@ -149,17 +152,18 @@ class CyberdonosBackgroundJS {
     return Promise.all(listPromises)
            .then(rawData => {
              return Promise.all([
-               rawData[0].json(),
-               rawData[1].json(),
-               rawData[2].status === 200 ? rawData[2].text() : rawData[3].text(),
-               rawData[4].json()
+               rawData[0].status === 200 ? rawData[0].text() : rawData[1].text(),
+               rawData[2].json(),
+               rawData[3].status === 200 ? rawData[3].text() : rawData[4].text(),
+               rawData[5].json()
              ])
            })
            .then(results => {
-             this.LISTS.twitter.POROHOBOTY_PIDORY = results[0]
+             this.LISTS.twitter.POROHOBOTY_PIDORY = results[0].split("\r\n").length > 1 ? results[0].split("\r\n") : results[0].split("\n") || []
              this.LISTS.twitter.L_BUTTERS_STOTCH = results[1]
              this.LISTS.twitter.ANTIBOT4NAVALNY = results[2].split("\n") || []
              this.LISTS.twitter.NASHACANADA = results[3]
+             console.log(this.LISTS.twitter);
            })
            .catch(e => console.error(e))
   }

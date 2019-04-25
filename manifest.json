@@ -1,13 +1,13 @@
 {
   "name": "cyberdonos",
-  "version": "2.5.9",
+  "version": "2.5.10",
   "manifest_version": 2,
   "homepage_url": "https://github.com/cyberdonos/cyberdonos-browser-extension",
   "description": "Идентификация и добавление кремлеботов, проплаченных и других способствующих укреплению режима людей во вконтакте, twitter, youtube.",
   "background": {
     "scripts": ["js/dayjs.js", "js/background-new.js"]
   },
-  "content_security_policy": "default-src 'self'; connect-src https://karatel.foss.org.ua http://*.cyberdonos.xyz https://*.cyberdonos.xyz https://vk.com https://blocktogether.org https://raw.githubusercontent.com;",
+  "content_security_policy": "default-src 'self'; connect-src https://karatel.foss.org.ua http://*.cyberdonos.xyz https://*.cyberdonos.xyz https://vk.com https://blocktogether.org https://raw.githubusercontent.com https://pastebin.com;",
   "content_scripts": [
     {
       "matches": [
@@ -49,6 +49,7 @@
     "https://twitter.com/*",
     "https://karatel.foss.org.ua/*",
     "https://blocktogether.org/*",
-    "https://raw.githubusercontent.com/*"
+    "https://raw.githubusercontent.com/*",
+    "https://pastebin.com/raw/*"
   ]
 }
