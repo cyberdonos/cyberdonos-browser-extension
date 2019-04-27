@@ -79,7 +79,7 @@ class CyberdonosBackgroundJS {
              text: "В списках #ПОРОХОБОТЫПИДОРЫ",
              type: "text",
              urls: [
-               `https://pastebin.com/raw/t2fG8TT7`, 
+               `https://gist.githubusercontent.com/mmxaa/c2e948ca312c6a62757ce80d9bf3b429/raw/porohoboti.csv`, 
                browser.extension.getURL("assets/porohobotypidori.txt") 
              ]
            },
@@ -163,7 +163,7 @@ class CyberdonosBackgroundJS {
              this.LISTS.twitter.L_BUTTERS_STOTCH = results[1]
              this.LISTS.twitter.ANTIBOT4NAVALNY = results[2].split("\n") || []
              this.LISTS.twitter.NASHACANADA = results[3]
-             console.log(this.LISTS.twitter);
+             //console.log(this.LISTS.twitter);
            })
            .catch(e => console.error(e))
   }
