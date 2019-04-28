@@ -19,10 +19,16 @@
     <div class="container config">
       <div class="row">
         <div class="column">
-          Глобальный интервал обновления
+          Глобальный интервал обновления отрисовки (в милисекундах)
         </div>
         <div class="column">
           <input type="number" max="10000" min="3000" class="updateInterval"></input>
+        </div>
+        <div class="column">
+          Интервал обновления списков (в секундах) - 0 для отключения
+        </div>
+        <div class="column">
+          <input type="number" min="0" class="updateListsIntervalInSeconds"></input>
         </div>
         <div class="twitter-lists-container">
           <h4>Списки для твиттера</h4>

@@ -32,11 +32,13 @@ const getAccountData = () => {
             div.appendChild(nestedDiv)
           })
           document.getElementsByClassName('updateInterval')[0].value = parseInt(config.updateInterval)
+          document.getElementsByClassName('updateListsIntervalInSeconds')[0].value = parseInt(config.updateListsIntervalInSeconds) / 1000
         })
 }
 
 document.querySelector(`button.save-config`).addEventListener('click', () => {
   config.updateInterval = parseInt(document.querySelector('.updateInterval').value)
+  config.updateListsIntervalInSeconds = parseInt(document.querySelector('.updateListsIntervalInSeconds').value)
   Object.keys(config.lists.lists.twitter).forEach(k => {
     const cb = document.getElementById(k)
     config.lists.lists.twitter[k].active = cb.checked

@@ -2,6 +2,7 @@ class CyberdonosBackgroundJS {
   constructor() {
     this.HOSTNAME = this.getServer()
     this.TAGS = null
+    this.updateListIntervalFn = null
     this.SERVER_UNREACHABLE = "server-unreachable"
     console.log(`Выбран сервер: ${this.HOSTNAME}`)
     this.HEADERS = {
@@ -38,6 +39,7 @@ class CyberdonosBackgroundJS {
    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
    this.CONFIG = {
      updateInterval: 5000,
+     updateListsIntervalInSeconds: 0, 
      lists: {
        lists: {
          youtube: {
@@ -425,11 +427,36 @@ class CyberdonosBackgroundJS {
     })
   }
 
+  startUpdateListsInterval() {
+    this.updateListIntervalFn = setInterval(() => {
+      this.loadTwitterLists()
+      this.loadYoutubeLists()
+      console.log('Списки обновлены.');
+    }, this.CONFIG.updateListsIntervalInSeconds)
+  }
+  
+  updateListsInterval(seconds){
+    clearInterval(this.updateListIntervalFn)
+    this.CONFIG.updateListsIntervalInSeconds = seconds * 1000
+    if (seconds == 0) {
+      localStorage["config"] = JSON.stringify(this.CONFIG)
+    }
+    else {
+      this.startUpdateListsInterval()
+    }
+  }
+
   startListener() {
+    if (this.CONFIG.updateListsIntervalInSeconds && this.CONFIG.updateListsIntervalInSeconds > 0) {
+      this.startUpdateListsInterval()
+    }
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       //console.log(request)
       if (request.action === 'getSystemData') {
         sendResponse({ tags: this.TAGS, server: this.HOSTNAME, statuses: this.STATUSES, config: this.CONFIG })
+      }
+      else if (request.action === 'setUpdateListsInterval' && parseInt(request.data)) {
+        
       }
       else if (request.action === "getAccountData") {
         sendResponse({
@@ -553,6 +580,7 @@ class CyberdonosBackgroundJS {
       else if (request.action === 'saveConfig' && request.data) {
         this.CONFIG = request.data
         localStorage["config"] = JSON.stringify(this.CONFIG)
+        this.updateListsInterval(parseInt(this.CONFIG.updateListsIntervalInSeconds) || 0)
       }
       else {
         console.log(`неверный action ${JSON.stringify(request)}`)

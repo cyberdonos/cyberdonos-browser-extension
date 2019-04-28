@@ -13,7 +13,6 @@ class CyberdonosContentJSListener {
     this.SERVER = null,
     this.SELECT_TAGS = null
     this.TYPE = null
-    this.top30url = `https://www.t30p.ru/search.aspx?`
     this.CONFIG = {}
   }
 
@@ -476,12 +475,8 @@ class CyberdonosContentJSListener {
         nameWhenAdded = element.querySelector(whereToGetName).textContent.trim()
       }
     }
-    // добавляем поиск по top30 и дату регистрации
+    // добавляем  дату регистрации
     if (this.TYPE === 'youtube') {
-      element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML(
-        'beforeend',
-        `<a href="${this.top30url}s=server:youtube.com ${encodeURIComponent(nameWhenAdded)}"  target="_blank"><img src="${browser.extension.getURL("assets/top30.png")}" title="Найти упоминания юзера в top30" class="cyberdonos-tag cursor-pointer" id="${userId}" /></a>`
-      )
       if (!element.querySelector(`div.cyberdonos-tags`).querySelector('b.yt-registration-date')) {
         element.querySelector(`div.cyberdonos-tags`).insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${this.PERSONS[this.TYPE][userId] ? this.PERSONS[this.TYPE][userId].registration_date : "Ошибка" }</b>`)
       }
