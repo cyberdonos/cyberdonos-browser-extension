@@ -98,7 +98,7 @@ class CyberdonosBackgroundJS {
              text: "В списках кремлеботов antibot4navalny - https://twitter.com/antibot4navalny",
              type: "text",
              urls: [
-               `https://blocktogether.org/show-blocks/SiJai3FyVmodO0XxkL2r-pezIK_oahHRwqv9I6U3.csv`,
+               `https://blocktogether.org/show-blocks/HYZ_Qq1P1xyxcDDbgLQ3l8OhhFLAolDZvpUqHP3A.csv`,
                browser.extension.getURL("assets/antibot4navalny.txt")
              ]
            },
