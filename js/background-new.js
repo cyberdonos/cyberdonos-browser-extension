@@ -1,6 +1,7 @@
 class CyberdonosBackgroundJS {
   constructor() {
     this.HOSTNAME = this.getServer()
+    this.IsCyberdonosServerSideEnabled = true
     this.TAGS = null
     this.updateListIntervalFn = null
     this.SERVER_UNREACHABLE = "server-unreachable"
@@ -39,7 +40,7 @@ class CyberdonosBackgroundJS {
    this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
    this.CONFIG = {
      updateInterval: 5000,
-     updateListsIntervalInSeconds: 0, 
+     updateListsIntervalInSeconds: 0,
      lists: {
        lists: {
          youtube: {
@@ -81,8 +82,9 @@ class CyberdonosBackgroundJS {
              text: "В списках #ПОРОХОБОТЫПИДОРЫ",
              type: "text",
              urls: [
-               `https://gist.githubusercontent.com/mmxaa/c2e948ca312c6a62757ce80d9bf3b429/raw/porohoboti.csv`, 
-               browser.extension.getURL("assets/porohobotypidori.txt") 
+               `https://gist.githubusercontent.com/mmxaa/70ea066117982855318f8e1a7cee0f5a/raw/porohoboti1.csv`,
+               `https://gist.githubusercontent.com/mmxaa/116a7564d5f4285a8de8ea9507b6fc8c/raw/porohoboti2.csv`,
+               browser.extension.getURL("assets/porohobotypidori.txt")
              ]
            },
            L_BUTTERS_STOTCH: {
@@ -154,17 +156,27 @@ class CyberdonosBackgroundJS {
     return Promise.all(listPromises)
            .then(rawData => {
              return Promise.all([
-               rawData[0].status === 200 ? rawData[0].text() : rawData[1].text(),
-               rawData[2].json(),
-               rawData[3].status === 200 ? rawData[3].text() : rawData[4].text(),
-               rawData[5].json()
+               rawData[0].status === 200 ? rawData[0].text() : rawData[2].text(),
+               rawData[1].status === 200 ? rawData[1].text() : rawData[2].text(),
+               rawData[3].json(),
+               rawData[4].status === 200 ? rawData[4].text() : rawData[5].text(),
+               rawData[6].json()
              ])
            })
            .then(results => {
-             this.LISTS.twitter.POROHOBOTY_PIDORY = results[0].split("\r\n").length > 1 ? results[0].split("\r\n") : results[0].split("\n") || []
-             this.LISTS.twitter.L_BUTTERS_STOTCH = results[1]
-             this.LISTS.twitter.ANTIBOT4NAVALNY = results[2].split("\n") || []
-             this.LISTS.twitter.NASHACANADA = results[3]
+             let uniqPorohobots = []
+             if (results[0].split("\n").length > 1 && results[1].split("\n").length > 1) {
+               const p1 = results[0].split("\n")
+               const p2 = results[1].split("\n")
+               const poroxobots = p1.concat(p2)
+               this.LISTS.twitter.POROHOBOTY_PIDORY = [...new Set(poroxobots)]
+             }
+             else {
+               this.LISTS.twitter.POROHOBOTY_PIDORY = uniqPorohobots
+             }
+             this.LISTS.twitter.L_BUTTERS_STOTCH = results[2]
+             this.LISTS.twitter.ANTIBOT4NAVALNY = results[3].split("\n") || []
+             this.LISTS.twitter.NASHACANADA = results[4]
              //console.log(this.LISTS.twitter);
            })
            .catch(e => console.error(e))
@@ -434,7 +446,7 @@ class CyberdonosBackgroundJS {
       console.log('Списки обновлены.');
     }, this.CONFIG.updateListsIntervalInSeconds)
   }
-  
+
   updateListsInterval(seconds){
     clearInterval(this.updateListIntervalFn)
     this.CONFIG.updateListsIntervalInSeconds = seconds * 1000
@@ -456,7 +468,7 @@ class CyberdonosBackgroundJS {
         sendResponse({ tags: this.TAGS, server: this.HOSTNAME, statuses: this.STATUSES, config: this.CONFIG })
       }
       else if (request.action === 'setUpdateListsInterval' && parseInt(request.data)) {
-        
+
       }
       else if (request.action === "getAccountData") {
         sendResponse({
