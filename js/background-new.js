@@ -177,7 +177,7 @@ class CyberdonosBackgroundJS {
              this.LISTS.twitter.L_BUTTERS_STOTCH = results[2]
              this.LISTS.twitter.ANTIBOT4NAVALNY = results[3].split("\n") || []
              this.LISTS.twitter.NASHACANADA = results[4]
-             console.log(this.LISTS.twitter);
+             //console.log(this.LISTS.twitter);
            })
            .catch(e => console.error(e))
   }
