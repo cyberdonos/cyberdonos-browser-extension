@@ -82,8 +82,8 @@ class CyberdonosBackgroundJS {
              text: "В списках #ПОРОХОБОТЫПИДОРЫ",
              type: "text",
              urls: [
-               `https://gist.githubusercontent.com/mmxaa/70ea066117982855318f8e1a7cee0f5a/raw/porohoboti1.csv`,
-               `https://gist.githubusercontent.com/mmxaa/116a7564d5f4285a8de8ea9507b6fc8c/raw/porohoboti2.csv`,
+               `https://gitlab.com/mm6785/short-long/-/raw/master/pb-long.csv`,
+               `https://gitlab.com/mm6785/short-long/-/raw/master/pb-short.csv`,
                browser.extension.getURL("assets/porohobotypidori.txt")
              ]
            },
@@ -177,7 +177,7 @@ class CyberdonosBackgroundJS {
              this.LISTS.twitter.L_BUTTERS_STOTCH = results[2]
              this.LISTS.twitter.ANTIBOT4NAVALNY = results[3].split("\n") || []
              this.LISTS.twitter.NASHACANADA = results[4]
-             //console.log(this.LISTS.twitter);
+             console.log(this.LISTS.twitter);
            })
            .catch(e => console.error(e))
   }
@@ -311,17 +311,17 @@ class CyberdonosBackgroundJS {
       let result = { }
       return Promise.all([
                fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS),
-               fetch(this.KARATEL_GET_BY_ID_URL + userId)
+               fetch(this.KARATEL_GET_BY_ID_URL + userId).catch(e => console.error(`Ошибка при обращении к API Карателя: ${e.message}`))
              ])
              .then((rawResults) => {
                return Promise.all([
                  rawResults[0].json(),
-                 rawResults[1].text()
+                 rawResults[1] ? rawResults[1].text() : null
                ])
              })
              .then((results) => {
                result = results[0]
-               if (this.processKaratelResponse(results[1])) {
+               if (results[1] && this.processKaratelResponse(results[1])) {
                  if (!result.data) {
                    result.data = { }
                    result.data.inLists = [ ]

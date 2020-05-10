@@ -8,5 +8,5 @@ function commit {
 
 cd /opt/projects/cyberdonos-browser-extension
 [[ "$PWD" =~ /opt/projects/cyberdonos-browser-extension ]] && sudo chown -R cyberdonos:git-users *
-[[ "$PWD" =~ /opt/projects/cyberdonos-browser-extension ]] && sudo chmod -R 777 * 
+[[ "$PWD" =~ /opt/projects/cyberdonos-browser-extension ]] && sudo chmod -R 777 *
 [ ! -z "$1" ] && [[ "$PWD" =~ /opt/projects/cyberdonos-browser-extension ]] && commit "$1"
