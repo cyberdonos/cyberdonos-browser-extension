@@ -37,7 +37,7 @@ class CyberdonosBackgroundJS {
       "twitter": {}
     }
 
-   this.KARATEL_GET_BY_ID_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+   this.KARATEL_GET_BY_USERNAME_URL = `https://karatel.foss.org.ua/lib64/libcheck.so?screen_name=`
    this.CONFIG = {
      updateInterval: 5000,
      updateListsIntervalInSeconds: 0,
@@ -76,46 +76,44 @@ class CyberdonosBackgroundJS {
            }
          },
          twitter: {
-           POROHOBOTY_PIDORY: {
-             active: true,
-             icon_url: browser.extension.getURL("assets/ukrobot.png"),
-             text: "В списках #ПОРОХОБОТЫПИДОРЫ",
-             type: "text",
-             urls: [
-               `https://gitlab.com/mm6785/short-long/-/raw/master/pb-long.csv`,
-               `https://gitlab.com/mm6785/short-long/-/raw/master/pb-short.csv`,
-               browser.extension.getURL("assets/porohobotypidori.txt")
-             ]
-           },
-           L_BUTTERS_STOTCH: {
-             active: false,
-             icon_url: browser.extension.getURL("assets/butters.png"),
-             text: "В списке ботов/мракобесов Л.Баттерса Стотча - https://twitter.com/L_Stotch/status/1020894577341935616",
-             type: "json",
-             urls: [ browser.extension.getURL("assets/L_Butters_Stotch_List.json") ]
-           },
            ANTIBOT4NAVALNY: {
              active: true,
              icon_url: browser.extension.getURL("assets/antibot4navalny.png"),
              text: "В списках кремлеботов antibot4navalny - https://twitter.com/antibot4navalny",
              type: "text",
              urls: [
-               `https://blocktogether.org/show-blocks/HYZ_Qq1P1xyxcDDbgLQ3l8OhhFLAolDZvpUqHP3A.csv`,
+               `https://blocktogether.org/show-blocks/HYZ_Qq1P1xyxcDDbgLQ3l8OhhFLAolDZvpUqHP3A`,
                browser.extension.getURL("assets/antibot4navalny.txt")
              ]
+           },
+           L_BUTTERS_STOTCH: {
+             active: false,
+             icon_url: browser.extension.getURL("assets/butters.png"),
+             text: "В списке ботов/мракобесов Л.Баттерса Стотча - https://twitter.com/L_Stotch/status/1020894577341935616",
+             type: "text",
+             urls: [ browser.extension.getURL("assets/butters.txt") ]
            },
            NASHACANADA: {
              active: true,
              icon_url: browser.extension.getURL("assets/nasha_canada_bots.png"),
              text: "В списках ботов, ваты и долбаебов @NashaCanada - https://twitter.com/NashaCanada/status/1079629384976261120",
-             type: "json",
-             urls: [ browser.extension.getURL("assets/nasha_canada_bots.json") ]
+             type: "text",
+             urls: [ browser.extension.getURL("assets/nashacanada.txt") ]
            },
            KARATEL: {
              active: true,
              icon_url: browser.extension.getURL("assets/karatel.png"),
              text: "В списках Карателя",
-             url: `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+             url: `https://karatel.foss.org.ua/lib64/libcheck.so?screen_name=`
+           },
+           POROHOBOTY_PIDORY: {
+             active: true,
+             icon_url: browser.extension.getURL("assets/ukrobot.png"),
+             text: "В списках #ПОРОХОБОТЫПИДОРЫ",
+             type: "text",
+             urls: [
+               browser.extension.getURL("assets/porohobotypidori.txt")
+             ]
            }
        },
        vk: {},
@@ -127,7 +125,7 @@ class CyberdonosBackgroundJS {
             active: true,
             icon_url: browser.extension.getURL("assets/karatel.png"),
             text: "В списках Карателя",
-            url: `https://karatel.foss.org.ua/lib64/libcheck.so?tw_id=`
+            url: `https://karatel.foss.org.ua/lib64/libcheck.so?screen_name=`
           }
         },
         vk: {}
@@ -145,41 +143,49 @@ class CyberdonosBackgroundJS {
       "https://node4.cyberdonos.xyz",
       "https://node5.cyberdonos.xyz"
     ]
+    //const serverNames = [ "http://localhost" ]
     return serverNames[Math.floor(Math.random() * (serverNames.length) - 0)]
   }
 
   loadTwitterLists() {
     const listPromises = []
     Object.keys(this.CONFIG.lists.lists.twitter).filter(e => e !== 'KARATEL').forEach(key => {
+      console.log(key);
       this.CONFIG.lists.lists.twitter[key].urls.forEach(url => listPromises.push(fetch(url)))
     })
-    return Promise.all(listPromises)
-           .then(rawData => {
-             return Promise.all([
-               rawData[0].status === 200 ? rawData[0].text() : rawData[2].text(),
-               rawData[1].status === 200 ? rawData[1].text() : rawData[2].text(),
-               rawData[3].json(),
-               rawData[4].status === 200 ? rawData[4].text() : rawData[5].text(),
-               rawData[6].json()
-             ])
-           })
-           .then(results => {
-             let uniqPorohobots = []
-             if (results[0].split("\n").length > 1 && results[1].split("\n").length > 1) {
-               const p1 = results[0].split("\n")
-               const p2 = results[1].split("\n")
-               const poroxobots = p1.concat(p2)
-               this.LISTS.twitter.POROHOBOTY_PIDORY = [...new Set(poroxobots)]
-             }
-             else {
-               this.LISTS.twitter.POROHOBOTY_PIDORY = uniqPorohobots
-             }
-             this.LISTS.twitter.L_BUTTERS_STOTCH = results[2]
-             this.LISTS.twitter.ANTIBOT4NAVALNY = results[3].split("\n") || []
-             this.LISTS.twitter.NASHACANADA = results[4]
-             //console.log(this.LISTS.twitter);
-           })
-           .catch(e => console.error(e))
+    return Promise.all(listPromises).then(rawData => {
+      return Promise.all([
+        rawData[0].status === 200 ? rawData[0].text() : rawData[1].text(),
+        rawData[2].text(),
+        rawData[3].text(),
+        rawData[4].text()
+      ])
+    })
+    .then(results => {
+      // обработка юзернеймов антибот4навальный
+      if (results[0].trim().startsWith("<")) {
+        const parser = new DOMParser()
+        const blocktogetherPage = parser.parseFromString(results[0], 'text/html')
+        const userNames = []
+        const aNames = blocktogetherPage.querySelectorAll('tr.blocked-user > td > a.screen-name')
+        if (aNames.length > 0) {
+          aNames.forEach(item => {
+            userNames.push(item.text.trim())
+          })
+          this.LISTS.twitter.ANTIBOT4NAVALNY = userNames
+        }
+      }
+      else {
+        this.LISTS.twitter.ANTIBOT4NAVALNY = results[0].split("\n") || []
+      }
+      // список Баттерса
+      this.LISTS.twitter.L_BUTTERS_STOTCH = results[1].split("\n") || []
+      // список нашейканады
+      this.LISTS.twitter.NASHACANADA = results[2].split("\n") || []
+      // список ПОРОХОБОТЫПИДОРЫ
+      this.LISTS.twitter.POROHOBOTY_PIDORY = results[3].split("\n") || []
+      console.log(this.LISTS.twitter);
+    })
   }
 
   loadYoutubeLists() {
@@ -292,26 +298,26 @@ class CyberdonosBackgroundJS {
     const lowerCasedResult = response.toLowerCase()
     let result = false
     try {
-      const parsed = JSON.parse(lowerCasedResult)
-      if (parsed && parsed.banned && parsed.banned === true) {
-        result = true
-      }
+      const banPattern = /\"banned\": (false|true)/
+      console.log(lowerCasedResult);
+      const r = lowerCasedResult.match(banPattern)
+      result = r[1] === "true" ? true : false
     } catch (e) {
       console.error("Ошибка при получении ответа от API-карателя:", e)
     }
     return result
   }
 
-  getByTwitterId(userId, force = false) {
-    if (this.CACHE["twitter"][userId] && !force) {
+  getByTwitterUserName(userName, force = false) {
+    if (this.CACHE["twitter"][userName] && !force) {
       // console.log('из кэша')
-      return new Promise((resolve, reject) => resolve(this.CACHE["twitter"][userId]))
+      return new Promise((resolve, reject) => resolve(this.CACHE["twitter"][userName]))
     }
     else {
       let result = { }
       return Promise.all([
-               fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userId}`, this.HEADERS),
-               fetch(this.KARATEL_GET_BY_ID_URL + userId).catch(e => console.error(`Ошибка при обращении к API Карателя: ${e.message}`))
+               fetch(`${this.HOSTNAME}/api/v1/persons/get/twitter/${userName}`, this.HEADERS),
+               fetch(this.KARATEL_GET_BY_USERNAME_URL + userName).catch(e => console.error(`Ошибка при обращении к API Карателя: ${e.message}`))
              ])
              .then((rawResults) => {
                return Promise.all([
@@ -331,7 +337,7 @@ class CyberdonosBackgroundJS {
                  }
                  result.data.inLists.push('KARATEL')
                }
-               const lists = this.findTwitterIdInLists(userId)
+               const lists = this.findTwitterIdInLists(userName)
                if (lists.length > 0) {
                  if (!result.data) {
                    result.data = { }
@@ -345,7 +351,7 @@ class CyberdonosBackgroundJS {
                  lists.forEach(listElement => result.data.inLists.push(listElement))
                }
                //console.log(result)
-               this.CACHE["twitter"][userId] = result
+               this.CACHE["twitter"][userName] = result
                return result
              })
              .catch(e => console.error(e))
@@ -522,7 +528,7 @@ class CyberdonosBackgroundJS {
                   .then(data => {
                     insertResult = data
                     if (request.type === "twitter") {
-                      return this.getByTwitterId(request.data.id, true)
+                      return this.getByTwitterUserName(request.data.id, true)
                     }
                     else if (request.type === "youtube") {
                       return this.getByYTUser(request.data.id, true)
@@ -569,8 +575,9 @@ class CyberdonosBackgroundJS {
         })
         .catch(e => console.error(e))
       }
-      else if (request.action === "getByTwitterId" && parseInt(request.id)) {
-        return this.getByTwitterId(request.id)
+      else if (request.action === "getByTwitterUserName" && request.id) {
+        //console.log(request);
+        return this.getByTwitterUserName(request.id)
       }
       else if (request.action === "sendAbuse" && request.data) {
         return fetch(`${this.HOSTNAME}/api/v1/persons/abuse`, {

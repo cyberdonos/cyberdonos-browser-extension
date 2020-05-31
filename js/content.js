@@ -16,29 +16,26 @@ class CyberdonosContentJSListener {
     this.CONFIG = {}
   }
 
+  // twitter
   findTwitterUsers() {
-    console.log(`start search twitter Users`)
-    const allProfileActions = document.querySelectorAll('.ProfileTweet-action')
-    if (allProfileActions.length > 0) {
-      for (let i = 0; i < allProfileActions.length; i++) {
-        allProfileActions[i].style.minWidth = '0px'
-      }
-    }
-    const tweets = document.querySelectorAll(`.tweet:not(.cyberdonos-processed):not(.QuoteTweet-originalAuthor):not(.RetweetDialog-tweet)`)
-    //console.log(tweets);
+    const tweets = document.querySelectorAll('article[role=article]:not(.cyberdonos-processed)')
     this.findUsers(tweets)
     .then(() => {
-      Object.keys(this.PERSONS[this.TYPE]).forEach(userId => {
-        if (tweets.length > 0) {
+      // отмечаем твит как обработанный
+      if (tweets.length > 0) {
+        tweets.forEach(tweet => {
+          tweet.classList.add('cyberdonos-processed')
+        })
+        Object.keys(this.PERSONS[this.TYPE]).forEach(userName => {
           for (let i = 0; i < tweets.length; i++) {
-            if (userId === tweets[i].querySelector('a.account-group').getAttribute('data-user-id')) {
-              this.insertTags(tweets[i], userId, 'div.ProfileTweet-actionList', 'strong.fullname')
+            if (userName === tweets[i].querySelector('a[href]').getAttribute('href').substring(1)) {
+              this.insertTags(tweets[i], userName, 'div.css-1dbjc4n.r-18u37iz.r-1wtj0ep.r-156q2ks.r-1mdbhws', 'span.css-901oao.css-16my406.r-1qd0xha.r-ad9z0x.r-bcqeeo.r-qvutc0')
             }
           }
-        }
-      })
+        })
+      }
     })
-    .catch(e => console.error(e))
+
   }
 
   // FACEBOOK
@@ -364,7 +361,7 @@ class CyberdonosContentJSListener {
               }
             }
           }
-          console.log(`${userIds.length} uniq userIds`)
+          console.log(`${userIds.length} yt uniq userIds`)
           this.fillPersonsByUserIdsAndNulls(userIds)
           let getUsersP = userIds.map(e => browser.runtime.sendMessage({ action: 'getYoutubeUser', id: e }))
           Promise.all(getUsersP)
@@ -413,25 +410,26 @@ class CyberdonosContentJSListener {
           .catch(e => console.error(e))
         }
         else if (this.TYPE === "twitter") {
-          let userIds = []
+          const userNames = []
           for (let i = 0; i < selector.length; i++) {
-            let userId = selector[i].querySelector('a.account-group').getAttribute('data-user-id')
-            if (userId && userIds.indexOf(userId) === -1 && /\d+/.test(userId) && this.PERSONS[this.TYPE][userId] === undefined) {
-              userIds.push(userId)
-            }
+            const username = selector[i].querySelector('a[href]').getAttribute('href').substring(1)
+            userNames.push(username)
           }
-          console.log(`Найдено ${userIds.length} пользователей.`)
-          this.fillPersonsByUserIdsAndNulls(userIds)
-          const getTwitterUsersPromises = userIds.map(u => browser.runtime.sendMessage({action: "getByTwitterId", id: u}))
+          console.log(`Найдено ${userNames.length} пользователей.`)
+          // наполняем кэш пока что пустыми значениями
+          this.fillPersonsByUserIdsAndNulls(userNames)
+          const getTwitterUsersPromises = userNames.map(u => browser.runtime.sendMessage({action: "getByTwitterUserName", id: u}))
           Promise.all(getTwitterUsersPromises)
           .then((results) => {
-            //console.log(JSON.stringify(results))
+            //console.log('results!', JSON.stringify(results))
             for (let i = 0; i < results.length; i++) {
-              if (results[i].data) {
-                this.PERSONS[this.TYPE][userIds[i]] = results[i].data
+
+              if (results[i] && results[i].data) {
+                this.PERSONS[this.TYPE][userNames[i]] = results[i].data
               }
             }
             resolve()
+            //console.log(this.PERSONS)
           })
           .catch(e => console.error(e))
         }
@@ -451,9 +449,9 @@ class CyberdonosContentJSListener {
 
   insertAddButton(element, userId, whereToAppend, whereToGetName, options) {
     if (this.TYPE === 'twitter') {
-      let twitMenu = element.querySelector('div.ProfileTweet-action div.dropdown-menu ul')
-      twitMenu.innerHTML += `<li class="dropdown-divider" role="presentation"></li>`
-      twitMenu.innerHTML += `<li role="presentation"><a href="#" class="add-to-cyberdonos">Настрочить кибердонос</a></li>`
+      // let twitMenu = element.querySelector('div.ProfileTweet-action div.dropdown-menu ul')
+      // twitMenu.innerHTML += `<li class="dropdown-divider" role="presentation"></li>`
+      // twitMenu.innerHTML += `<li role="presentation"><a href="#" class="add-to-cyberdonos">Настрочить кибердонос</a></li>`
     }
     else {
       if (!element.querySelector(`div.cyberdonos-tags`).querySelector('.add-to-cyberdonos')) {
@@ -489,34 +487,44 @@ class CyberdonosContentJSListener {
         )
       }
     }
-
-    element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
-      document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
-      // запоняем скрытые поля
-      document.querySelector(`input.cd-name_when_added`).value = nameWhenAdded
-      document.querySelector(`span.cd-name_when_added`).textContent = nameWhenAdded
-      document.querySelector(`span.cd-user-id`).textContent = userId
-      document.querySelector(`input.cd-user-id`).value = userId
-      document.querySelector(`input.cd-type`).value = this.TYPE
-      // заполнили
-      document.querySelector(`.cd-add-person-proof`).value = null
-      document.querySelector(`input.cd-search-org`).value = null
-      document.querySelector(`input.cd-search-org`).addEventListener('input', () => {
-        document.querySelector(`select.cd-select-org-list`).style.display = 'none'
-        document.querySelector(`select.cd-select-org-list`).value = null
+    // пока загрушим
+    if (this.TYPE !== 'twitter') {
+      element.querySelector(`.add-to-cyberdonos`).addEventListener('click', () => {
+        document.querySelector(`select.cd-select-tags`).innerHTML = this.TAGS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
+        // запоняем скрытые поля
+        document.querySelector(`input.cd-name_when_added`).value = nameWhenAdded
+        document.querySelector(`span.cd-name_when_added`).textContent = nameWhenAdded
+        document.querySelector(`span.cd-user-id`).textContent = userId
+        document.querySelector(`input.cd-user-id`).value = userId
+        document.querySelector(`input.cd-type`).value = this.TYPE
+        // заполнили
+        document.querySelector(`.cd-add-person-proof`).value = null
+        document.querySelector(`input.cd-search-org`).value = null
+        document.querySelector(`input.cd-search-org`).addEventListener('input', () => {
+          document.querySelector(`select.cd-select-org-list`).style.display = 'none'
+          document.querySelector(`select.cd-select-org-list`).value = null
+        })
+        document.querySelector(`.cd-select-org-list`).style.display = 'none'
+        document.querySelector(`div.cd-add-person-popup`).style.display = 'block'
       })
-      document.querySelector(`.cd-select-org-list`).style.display = 'none'
-      document.querySelector(`div.cd-add-person-popup`).style.display = 'block'
-    })
+    }
+
   }
 
   insertTags(element, userId, whereToAppend, whereToGetName, options) {
     try {
-      const whereToAppendTags = element.querySelector(whereToAppend)
-      //console.log(whereToAppendTags)
+      let whereToAppendTags = element.querySelector(whereToAppend)
+      // фикс для заглавного твита
+      if (!whereToAppendTags && this.TYPE === 'twitter') {
+         whereToAppendTags = element.querySelector('div.css-1dbjc4n.r-1oszu61.r-1gkumvb.r-1efd50x.r-5kkj8d.r-18u37iz.r-ahm1il.r-a2tzq0')
+      }
+      //console.log(element, userId, whereToAppend, whereToGetName, whereToAppendTags);
+      //console.log('where', element, whereToAppendTags)
+      //console.log(userId);
       const cyberdonosTagsForDiv = ["cyberdonos-tags"]
       if (this.TYPE === 'twitter') {
-        cyberdonosTagsForDiv.push("ProfileTweet-action")
+        //cyberdonosTagsForDiv.push("ProfileTweet-action")
+        //cyberdonosTagsForDiv.push("css-1dbjc4n r-18u37iz r-1wtj0ep r-156q2ks r-1mdbhws")
       }
       whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
       const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
