@@ -512,91 +512,98 @@ class CyberdonosContentJSListener {
   }
 
   insertTags(element, userId, whereToAppend, whereToGetName, options) {
-    try {
-      let whereToAppendTags = element.querySelector(whereToAppend)
-      // фикс для заглавного твита
-      if (!whereToAppendTags && this.TYPE === 'twitter') {
-         whereToAppendTags = element.querySelector('div.css-1dbjc4n.r-1oszu61.r-1gkumvb.r-1efd50x.r-5kkj8d.r-18u37iz.r-ahm1il.r-a2tzq0')
-      }
-      //console.log(element, userId, whereToAppend, whereToGetName, whereToAppendTags);
-      //console.log('where', element, whereToAppendTags)
-      //console.log(userId);
-      const cyberdonosTagsForDiv = ["cyberdonos-tags"]
-      if (this.TYPE === 'twitter') {
-        //cyberdonosTagsForDiv.push("ProfileTweet-action")
-        //cyberdonosTagsForDiv.push("css-1dbjc4n r-18u37iz r-1wtj0ep r-156q2ks r-1mdbhws")
-      }
-      whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
-      const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
-      //console.log(this.PERSONS[this.TYPE][userId]);
-      if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || (this.PERSONS[this.TYPE][userId].inLists && this.PERSONS[this.TYPE][userId].inLists.length > 0)  || (this.PERSONS[this.TYPE][userId].registerDate && this.PERSONS[this.TYPE][userId].lastLoggedIn) )) {
-        //console.log(this.PERSONS[this.TYPE]);
-        const user = this.PERSONS[this.TYPE][userId]
-        //console.log(user);
-        // фикс для юзеров на ютюбе не состоящих в списках
-        if (user.inLists && user.inLists.length === 0 && !user.proof) {
+    // если cyberdonos-tags уже есть, то больше не вставлять! В частности из-за того что твиттер постоянно мутирует верстку!
+    if (element.querySelector(whereToAppend + ' > .cyberdonos-tags') == null) {
+
+      try {
+
+        let whereToAppendTags = element.querySelector(whereToAppend)
+        // фикс для заглавного твита
+        if (!whereToAppendTags && this.TYPE === 'twitter') {
+           whereToAppendTags = element.querySelector('div.css-1dbjc4n.r-1oszu61.r-1gkumvb.r-1efd50x.r-5kkj8d.r-18u37iz.r-ahm1il.r-a2tzq0')
+        }
+        //console.log(element, userId, whereToAppend, whereToGetName, whereToAppendTags);
+        //console.log('where', element, whereToAppendTags)
+        //console.log(userId);
+        const cyberdonosTagsForDiv = ["cyberdonos-tags"]
+        if (this.TYPE === 'twitter') {
+          //cyberdonosTagsForDiv.push("ProfileTweet-action")
+          //cyberdonosTagsForDiv.push("css-1dbjc4n r-18u37iz r-1wtj0ep r-156q2ks r-1mdbhws")
+        }
+        whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
+        const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
+        //console.log(this.PERSONS[this.TYPE][userId]);
+        if (this.PERSONS[this.TYPE][userId] && (this.PERSONS[this.TYPE][userId].tags || (this.PERSONS[this.TYPE][userId].inLists && this.PERSONS[this.TYPE][userId].inLists.length > 0)  || (this.PERSONS[this.TYPE][userId].registerDate && this.PERSONS[this.TYPE][userId].lastLoggedIn) )) {
+          //console.log(this.PERSONS[this.TYPE]);
+          const user = this.PERSONS[this.TYPE][userId]
+          //console.log(user);
+          // фикс для юзеров на ютюбе не состоящих в списках
+          if (user.inLists && user.inLists.length === 0 && !user.proof) {
+            this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
+          }
+          if (user.tags) {
+            const tagIds = JSON.parse(user.tags)
+            tagIds.forEach((tagId) => {
+              let tag = this.TAGS.find(e => e.id == tagId)
+              if (tag.base64) {
+                cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="data:image/png;base64,${tag.base64}" class="cyberdonos-tag" title="${tag.name}"/>`)
+              }
+              else {
+                let tagUrl = `assets/${tag.icon_name}.png`
+                cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL(tagUrl)}" class="cyberdonos-tag" title="${tag.name}"/>`)
+              }
+            })
+          }
+          if (user.proof) {
+            cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/proof.png")}" title="Пруф: ${user.proof}" class="cyberdonos-tag cursor-pointer cyberdonos-proof" id="${userId}" />`)
+            element.querySelector(`img.cyberdonos-proof`).addEventListener('click', () => {
+              document.querySelector(`p.cd-proof-text`).textContent = user.proof
+              document.querySelector(`div.cd-proof-popup`).style.display = 'block'
+            })
+          }
+          if (user.inLists && user.inLists.length > 0) {
+            user.inLists.forEach(list => {
+              const meta = this.CONFIG.lists.lists[this.TYPE][list]
+              cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${meta.icon_url}" title="${meta.text}" class="cyberdonos-tag" />`)
+            })
+          }
+          if (user.name_when_added) {
+            cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
+          }
+          if (user.registration_date) {
+            cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${user.registration_date}</b>`)
+          }
+          if (user.registerDate && user.lastLoggedIn) {
+            if (!cyberdonosTags.querySelector('.vk-registration-date')) {
+              cyberdonosTags.insertAdjacentHTML(
+                'beforeend',
+                `<img src="${browser.extension.getURL("assets/register.png")}" title="Дата регистрации: ${user.registerDate}" class="vk-registration-date"/>`
+              )
+            }
+            if (!cyberdonosTags.querySelector('.vk-last-login-date')) {
+              cyberdonosTags.insertAdjacentHTML(
+                'beforeend',
+                `<img src="${browser.extension.getURL("assets/login.png")}" title="Дата последнего посещения: ${user.lastLoggedIn}" class="vk-last-login-date"/>`
+              )
+            }
+          }
+          if (this.TYPE === 'vk' && !user.tags) {
+            this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
+          }
+          if (user.org_name) {
+            cyberdonosTags.insertAdjacentHTML('beforeend',`<span class="cyberdonos-tag">${user.org_name}</span>`)
+          }
+        }
+        else {
           this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
         }
-        if (user.tags) {
-          const tagIds = JSON.parse(user.tags)
-          tagIds.forEach((tagId) => {
-            let tag = this.TAGS.find(e => e.id == tagId)
-            if (tag.base64) {
-              cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="data:image/png;base64,${tag.base64}" class="cyberdonos-tag" title="${tag.name}"/>`)
-            }
-            else {
-              let tagUrl = `assets/${tag.icon_name}.png`
-              cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL(tagUrl)}" class="cyberdonos-tag" title="${tag.name}"/>`)
-            }
-          })
-        }
-        if (user.proof) {
-          cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/proof.png")}" title="Пруф: ${user.proof}" class="cyberdonos-tag cursor-pointer cyberdonos-proof" id="${userId}" />`)
-          element.querySelector(`img.cyberdonos-proof`).addEventListener('click', () => {
-            document.querySelector(`p.cd-proof-text`).textContent = user.proof
-            document.querySelector(`div.cd-proof-popup`).style.display = 'block'
-          })
-        }
-        if (user.inLists && user.inLists.length > 0) {
-          user.inLists.forEach(list => {
-            const meta = this.CONFIG.lists.lists[this.TYPE][list]
-            cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${meta.icon_url}" title="${meta.text}" class="cyberdonos-tag" />`)
-          })
-        }
-        if (user.name_when_added) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<img src="${browser.extension.getURL("assets/name_when_added.png")}" title="Имя при добавлении: ${user.name_when_added}" class="cyberdonos-tag" />`)
-        }
-        if (user.registration_date) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${user.registration_date}</b>`)
-        }
-        if (user.registerDate && user.lastLoggedIn) {
-          if (!cyberdonosTags.querySelector('.vk-registration-date')) {
-            cyberdonosTags.insertAdjacentHTML(
-              'beforeend',
-              `<img src="${browser.extension.getURL("assets/register.png")}" title="Дата регистрации: ${user.registerDate}" class="vk-registration-date"/>`
-            )
-          }
-          if (!cyberdonosTags.querySelector('.vk-last-login-date')) {
-            cyberdonosTags.insertAdjacentHTML(
-              'beforeend',
-              `<img src="${browser.extension.getURL("assets/login.png")}" title="Дата последнего посещения: ${user.lastLoggedIn}" class="vk-last-login-date"/>`
-            )
-          }
-        }
-        if (this.TYPE === 'vk' && !user.tags) {
-          this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
-        }
-        if (user.org_name) {
-          cyberdonosTags.insertAdjacentHTML('beforeend',`<span class="cyberdonos-tag">${user.org_name}</span>`)
-        }
+        element.classList.add('cyberdonos-processed')
+      } catch (e) {
+        console.error(e)
       }
-      else {
-        this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)
-      }
-      element.classList.add('cyberdonos-processed')
-    } catch (e) {
-      console.error(e)
+
     }
+
   }
 
   insertWindows() {
