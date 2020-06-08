@@ -112,6 +112,7 @@ class CyberdonosBackgroundJS {
              text: "В списках #ПОРОХОБОТЫПИДОРЫ",
              type: "text",
              urls: [
+               `https://gitlab.com/mmxa/pb/-/raw/master/pb.csv`,
                browser.extension.getURL("assets/porohobotypidori.txt")
              ]
            }
@@ -158,7 +159,7 @@ class CyberdonosBackgroundJS {
         rawData[0].status === 200 ? rawData[0].text() : rawData[1].text(),
         rawData[2].text(),
         rawData[3].text(),
-        rawData[4].text()
+        rawData[4].status === 200 ? rawData[4].text() : rawData[5].text()
       ])
     })
     .then(results => {
@@ -183,7 +184,7 @@ class CyberdonosBackgroundJS {
       // список нашейканады
       this.LISTS.twitter.NASHACANADA = results[2].split("\n") || []
       // список ПОРОХОБОТЫПИДОРЫ
-      this.LISTS.twitter.POROHOBOTY_PIDORY = results[3].split("\n") || []
+      this.LISTS.twitter.POROHOBOTY_PIDORY = results[3].split("\n").map(e => e.includes(";") ? e.split(";")[1].trim() : null) || []
       console.log(this.LISTS.twitter);
     })
   }
