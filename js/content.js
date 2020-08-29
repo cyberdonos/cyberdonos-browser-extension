@@ -98,7 +98,10 @@ class CyberdonosContentJSListener {
             for (let i = 0; i < posts.length; i++) {
               const postAuhtorEl = posts[i].querySelector('a.author')
               if (postAuhtorEl && posts[i] && postAuhtorEl.getAttribute('data-from-id') === userId) {
-                this.insertTags(posts[i], userId, 'div.like_cont', 'a.author')
+                // патч от задвоения
+                if (posts[i].querySelector('div.reply_author > div.cyberdonos-tags') == null) {
+                  this.insertTags(posts[i], userId, 'div.like_cont', 'a.author')
+                }
               }
             }
           }
@@ -402,7 +405,8 @@ class CyberdonosContentJSListener {
             //console.log(results)
             results.forEach((r) => {
               let userId = Object.keys(r)[0]
-              this.PERSONS[this.TYPE][userId] = r[userId].data ? Object.assign(r[userId].data, r[userId].dates) : r[userId].dates
+              //console.log(r);
+              this.PERSONS[this.TYPE][userId] = r[userId].data ? Object.assign(r[userId].data) : null
             })
             //console.log(this.PERSONS[this.TYPE])
             resolve()
@@ -513,6 +517,9 @@ class CyberdonosContentJSListener {
 
   insertTags(element, userId, whereToAppend, whereToGetName, options) {
     // если cyberdonos-tags уже есть, то больше не вставлять! В частности из-за того что твиттер постоянно мутирует верстку!
+    //console.log('111111111111111111111',element, userId, whereToAppend, whereToGetName);
+    //console.log(whereToAppend + ' > .cyberdonos-tags');
+    //console.log(element.querySelector(whereToAppend + ' > .cyberdonos-tags'));
     if (element.querySelector(whereToAppend + ' > .cyberdonos-tags') == null) {
 
       try {
@@ -572,20 +579,6 @@ class CyberdonosContentJSListener {
           }
           if (user.registration_date) {
             cyberdonosTags.insertAdjacentHTML('beforeend',`<b class="cyberdonos-tag yt-registration-date">Регистрация: ${user.registration_date}</b>`)
-          }
-          if (user.registerDate && user.lastLoggedIn) {
-            if (!cyberdonosTags.querySelector('.vk-registration-date')) {
-              cyberdonosTags.insertAdjacentHTML(
-                'beforeend',
-                `<img src="${browser.extension.getURL("assets/register.png")}" title="Дата регистрации: ${user.registerDate}" class="vk-registration-date"/>`
-              )
-            }
-            if (!cyberdonosTags.querySelector('.vk-last-login-date')) {
-              cyberdonosTags.insertAdjacentHTML(
-                'beforeend',
-                `<img src="${browser.extension.getURL("assets/login.png")}" title="Дата последнего посещения: ${user.lastLoggedIn}" class="vk-last-login-date"/>`
-              )
-            }
           }
           if (this.TYPE === 'vk' && !user.tags) {
             this.insertAddButton(element, userId, whereToAppend, whereToGetName, options)

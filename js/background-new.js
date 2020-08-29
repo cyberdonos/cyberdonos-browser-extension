@@ -28,7 +28,9 @@ class CyberdonosBackgroundJS {
         POROHOBOTY_PIDORY: []
       },
       youtube: {},
-      vk: {}
+      vk: {
+        GOSVON: []
+      }
     }
 
     this.CACHE = {
@@ -117,7 +119,18 @@ class CyberdonosBackgroundJS {
              ]
            }
        },
-       vk: {},
+       vk: {
+         GOSVON: {
+           active: true,
+           icon_url: browser.extension.getURL("assets/gosvon.png"),
+           text: "В списках ГОСВОНИ (gosvon.net) - тролли, боты, спам",
+           type: "text",
+           urls: [
+             `https://gosvon.net/export.php?t=txt2`,
+             browser.extension.getURL("assets/gosvon-vk.txt")
+           ]
+         }
+       },
       },
       api: {
         youtube: {},
@@ -156,7 +169,8 @@ class CyberdonosBackgroundJS {
     })
     return Promise.all(listPromises).then(rawData => {
       return Promise.all([
-        rawData[0].status === 200 ? rawData[0].text() : rawData[1].text(),
+        // потому что список на blocktogether просто поломан :(
+        rawData[1].text(),
         rawData[2].text(),
         rawData[3].text(),
         rawData[4].status === 200 ? rawData[4].text() : rawData[5].text()
@@ -185,8 +199,30 @@ class CyberdonosBackgroundJS {
       this.LISTS.twitter.NASHACANADA = results[2].split("\n") || []
       // список ПОРОХОБОТЫПИДОРЫ
       this.LISTS.twitter.POROHOBOTY_PIDORY = results[3].split("\n").map(e => e.includes(";") ? e.split(";")[1].trim() : null) || []
-      console.log(this.LISTS.twitter);
+      //console.log(this.LISTS.twitter);
     })
+  }
+
+  loadVkLists(){
+    const _promises = []
+    Object.keys(this.CONFIG.lists.lists.vk).forEach(key => {
+      this.CONFIG.lists.lists.vk[key].urls.forEach(url => _promises.push(fetch(url)))
+    })
+    return Promise.all(_promises)
+           .then(_rawResults => {
+             const gosvonRaw = _rawResults[0].status === 200 ? _rawResults[0] : _rawResults[1]
+             return gosvonRaw.text()
+           })
+           .then(result => {
+             if (result.includes("<br>")) {
+               this.LISTS.vk.GOSVON = result.split("<br>").map(e => parseInt(e))
+             }
+             else if(result.includes("\n")) {
+               this.LISTS.vk.GOSVON = result.split("\n").map(e => parseInt(e))
+             }
+             //console.log(this.LISTS.vk);
+           })
+           .catch(e => console.error(e))
   }
 
   loadYoutubeLists() {
@@ -247,31 +283,6 @@ class CyberdonosBackgroundJS {
     }
   }
 
-  getCreatedDateAndLastModified(vkId) {
-    //console.log(`Получение данных о регистрации и логине для ${vkId}`)
-    return new Promise((resolve, reject) => {
-      return fetch(`https://vk.com/foaf.php?id=${vkId}`)
-      .then((response) => response.text())
-      .then((str) => {
-        // это группа - игнорируем ее
-        if (vkId.startsWith("-")) {
-          resolve({ registerDate: null, lastLoggedIn: null })
-        }
-        else {
-          try {
-            const xml = new window.DOMParser().parseFromString(str, "text/xml")
-            const registerDate = xml.getElementsByTagName("ya:created").length > 0 ? dayjs(xml.getElementsByTagName("ya:created")[0].getAttribute("dc:date")).format("DD.MM.YY") : "null"
-            const lastLoginDate = xml.getElementsByTagName("ya:lastLoggedIn").length > 0 ? dayjs(xml.getElementsByTagName("ya:lastLoggedIn")[0].getAttribute("dc:date")).format("DD.MM.YY") : "null"
-            resolve({ registerDate: registerDate, lastLoggedIn: lastLoginDate })
-          } catch (e) {
-            console.error(e)
-            resolve({ registerDate: e, lastLoggedIn: e })
-          }
-        }
-      })
-    })
-  }
-
   getTags() {
     return fetch(`${this.HOSTNAME}/api/v1/tags`, this.HEADERS)
            .then((response) => response.json())
@@ -287,6 +298,10 @@ class CyberdonosBackgroundJS {
       return fetch(`${this.HOSTNAME}/api/v1/persons/get/vk/${vkId}`, this.HEADERS)
              .then((response) => response.json())
              .then((data) => {
+               if (data.data == null) {
+                 data.data = {}
+               }
+               data.data.inLists = this.findVKUserInLists(vkId)
                this.CACHE["vk"][vkId] = data
                return new Promise((resolve, reject) => resolve(data))
              })
@@ -300,7 +315,7 @@ class CyberdonosBackgroundJS {
     let result = false
     try {
       const banPattern = /\"banned\": (false|true)/
-      console.log(lowerCasedResult);
+      //console.log(lowerCasedResult);
       const r = lowerCasedResult.match(banPattern)
       result = r[1] === "true" ? true : false
     } catch (e) {
@@ -385,6 +400,21 @@ class CyberdonosBackgroundJS {
     return inLists
   }
 
+  findVKUserInLists(id){
+    const listNames = Object.keys(this.CONFIG.lists.lists.vk)
+    const inLists = []
+    if (parseInt(id)) {
+      for (let i = 0; i < listNames.length; i++) {
+        if (this.CONFIG.lists.lists.vk[listNames[i]].active) {
+          if (this.LISTS.vk[listNames[i]].indexOf(parseInt(id)) !== -1) {
+            inLists.push(listNames[i])
+          }
+        }
+      }
+    }
+    return inLists
+  }
+
   getByYTUser(id, force = false) {
     if (this.CACHE["youtube"][id] && !force) {
       //console.log(`Получение из кэша ${id}, ${JSON.stringify(this.CACHE["youtube"][id])}`)
@@ -413,11 +443,11 @@ class CyberdonosBackgroundJS {
   start() {
     this.loadTwitterLists()//.then(() => console.log(this.LISTS))
     this.loadYoutubeLists()//.then(() => console.log(this.LISTS))
+    this.loadVkLists()
     // инициализация дефолтных настроек для списков
     this.createDefaultOrLoadConfig()
     fetch(`${this.HOSTNAME}/api/v1/status/get`)
     .then(() => {
-
       if (localStorage.getItem("token") && localStorage.getItem("role")) {
         console.log(`Токен ${localStorage.getItem("token")} и роль уже установлены ${localStorage.getItem("role")}`)
         this.HEADERS.headers.token = localStorage.getItem("token")
@@ -489,18 +519,8 @@ class CyberdonosBackgroundJS {
         r[request.data] = { }
         return this.getPersonByVkId(request.data)
         .then((result) => {
-          r[request.data] = { data: result.data, dates: null }
-          //console.log(result.data)
-          return new Promise((resolve, reject) => {
-            return this.getCreatedDateAndLastModified(request.data)
-            .then((dates) => {
-              //console.log(dates)
-              r[request.data].dates = dates
-              resolve(r)
-            })
-            .catch(e => console.error(e))
-
-          })
+          r[request.data] = { data: result.data }
+          return r
         })
         .catch(e => console.error(e))
       }
