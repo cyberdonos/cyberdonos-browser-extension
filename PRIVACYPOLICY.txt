@@ -1,3 +1,7 @@
+The privacy policy of cyberdonos browser extension.
+
 Hello!
 
-All what i get from you it only your public ip address (only once when you installed cyberdonos extension) it needs to prevent ddos attacks. 
+All what i get from you it only your public ip address (when cyberdonos extension is quering info from cyberdonos.xyz api) it needs to prevent ddos attacks. 
+
+No more data is collected.
