@@ -52,7 +52,7 @@ class CyberdonosBackgroundJS {
              text: "В списках Кремлеботов YTObserver/Metabot for youtube",
              type: "text",
              urls: [
-               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/mainDB`,
+               `https://raw.githubusercontent.com/FeignedAccomplice/YOUTUBOTS/master/KB.CSV`,
                browser.extension.getURL("assets/YTObserver-mainDB.txt")
              ]
            },
@@ -62,7 +62,7 @@ class CyberdonosBackgroundJS {
              text: "С списках SMM ботов YTObserver/Metabot for youtube",
              type: "text",
              urls: [
-               `https://raw.githubusercontent.com/YTObserver/YT-ACC-DB/master/additional_list_smm`,
+               `https://raw.githubusercontent.com/FeignedAccomplice/YOUTUBOTS/master/SMM.CSV`,
                browser.extension.getURL("assets/YTObserver_smm_all.txt")
              ]
            },
@@ -314,7 +314,7 @@ class CyberdonosBackgroundJS {
     const lowerCasedResult = response.toLowerCase()
     let result = false
     try {
-      const banPattern = /\"banned\": (false|true)/
+      const banPattern = /\"banned\":(false|true)/
       //console.log(lowerCasedResult);
       const r = lowerCasedResult.match(banPattern)
       result = r[1] === "true" ? true : false
