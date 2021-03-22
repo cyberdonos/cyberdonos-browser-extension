@@ -29,7 +29,7 @@ class CyberdonosContentJSListener {
         Object.keys(this.PERSONS[this.TYPE]).forEach(userName => {
           for (let i = 0; i < tweets.length; i++) {
             if (userName === tweets[i].querySelector('a[href]').getAttribute('href').substring(1)) {
-              this.insertTags(tweets[i], userName, 'div.css-1dbjc4n.r-18u37iz.r-1wtj0ep.r-156q2ks.r-1mdbhws', 'span.css-901oao.css-16my406.r-1qd0xha.r-ad9z0x.r-bcqeeo.r-qvutc0')
+              this.insertTags(tweets[i], userName, 'div.css-1dbjc4n.r-18u37iz.r-1wtj0ep.r-1s2bzr4.r-1mdbhws', 'span.css-901oao.css-16my406.r-1qd0xha.r-ad9z0x.r-bcqeeo.r-qvutc0')
             }
           }
         })
