@@ -517,9 +517,6 @@ class CyberdonosContentJSListener {
 
   insertTags(element, userId, whereToAppend, whereToGetName, options) {
     // если cyberdonos-tags уже есть, то больше не вставлять! В частности из-за того что твиттер постоянно мутирует верстку!
-    //console.log('111111111111111111111',element, userId, whereToAppend, whereToGetName);
-    //console.log(whereToAppend + ' > .cyberdonos-tags');
-    //console.log(element.querySelector(whereToAppend + ' > .cyberdonos-tags'));
     if (element.querySelector(whereToAppend + ' > .cyberdonos-tags') == null) {
 
       try {
@@ -527,16 +524,9 @@ class CyberdonosContentJSListener {
         let whereToAppendTags = element.querySelector(whereToAppend)
         // фикс для заглавного твита
         if (!whereToAppendTags && this.TYPE === 'twitter') {
-           whereToAppendTags = element.querySelector('div.css-1dbjc4n.r-1oszu61.r-1gkumvb.r-1efd50x.r-5kkj8d.r-18u37iz.r-ahm1il.r-a2tzq0')
+           whereToAppendTags = element.querySelector('div.css-1dbjc4n.r-18u37iz.r-1wtj0ep.r-1s2bzr4.r-1mdbhws')
         }
-        //console.log(element, userId, whereToAppend, whereToGetName, whereToAppendTags);
-        //console.log('where', element, whereToAppendTags)
-        //console.log(userId);
         const cyberdonosTagsForDiv = ["cyberdonos-tags"]
-        if (this.TYPE === 'twitter') {
-          //cyberdonosTagsForDiv.push("ProfileTweet-action")
-          //cyberdonosTagsForDiv.push("css-1dbjc4n r-18u37iz r-1wtj0ep r-156q2ks r-1mdbhws")
-        }
         whereToAppendTags.insertAdjacentHTML('beforeend', `<div class="${cyberdonosTagsForDiv.join(' ')}" id="${userId}"></div>`)
         const cyberdonosTags = element.querySelector(`div.cyberdonos-tags`)
         //console.log(this.PERSONS[this.TYPE][userId]);
@@ -561,13 +551,7 @@ class CyberdonosContentJSListener {
               }
             })
           }
-          if (user.proof) {
-            cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/proof.png")}" title="Пруф: ${user.proof}" class="cyberdonos-tag cursor-pointer cyberdonos-proof" id="${userId}" />`)
-            element.querySelector(`img.cyberdonos-proof`).addEventListener('click', () => {
-              document.querySelector(`p.cd-proof-text`).textContent = user.proof
-              document.querySelector(`div.cd-proof-popup`).style.display = 'block'
-            })
-          }
+
           if (user.inLists && user.inLists.length > 0) {
             user.inLists.forEach(list => {
               const meta = this.CONFIG.lists.lists[this.TYPE][list]
@@ -585,6 +569,17 @@ class CyberdonosContentJSListener {
           }
           if (user.org_name) {
             cyberdonosTags.insertAdjacentHTML('beforeend',`<span class="cyberdonos-tag">${user.org_name}</span>`)
+          }
+          if (user.proof) {
+            cyberdonosTags.insertAdjacentHTML('beforeend', `<img src="${browser.extension.getURL("assets/proof.png")}" title="Пруф: ${user.proof}" class="cyberdonos-tag cursor-pointer cyberdonos-proof" id="${userId}" />`)
+            // element.querySelector(`img.cyberdonos-proof`).addEventListener('click', () => {
+            //   let ppt = document.querySelector(`p.cd-proof-text`)
+            //   let ppp = document.querySelector(`div.cd-proof-popup`)
+            //   if (ppt & ppp) {
+            //     ppt.textContent = user.proof
+            //     ppp.style.display = 'block'
+            //   }
+            // })
           }
         }
         else {

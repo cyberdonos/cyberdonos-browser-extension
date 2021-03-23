@@ -41,7 +41,6 @@
   	"default_popup": "index.html"
   },
   "permissions": [
-    "storage",
     "notifications",
     "*://*.cyberdonos.xyz/*",
     "*://vk.com/*",
